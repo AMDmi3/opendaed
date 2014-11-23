@@ -9,6 +9,8 @@ ADD_DEFINITIONS("-std=c++11 -Wall -Wextra -pedantic")
 IF(NOT EXISTS ${PROJECT_SOURCE_DIR}/extlibs/SDL2pp/CMakeLists.txt)
 	MESSAGE(FATAL_ERROR "The source directory\n  ${PROJECT_SOURCE_DIR}/extlibs/SDL2pp\ndoes not contain a CMakeLists.txt file.\nIt is likely that you forgot to run\n  git submodule init && git submodule update")
 ENDIF(NOT EXISTS ${PROJECT_SOURCE_DIR}/extlibs/SDL2pp/CMakeLists.txt)
+
+SET(SDL2PP_WITH_IMAGE TRUE)
 ADD_SUBDIRECTORY(extlibs/SDL2pp)
 
 # sources

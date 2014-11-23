@@ -21,7 +21,11 @@
 
 #include <SDL2/SDL.h>
 
-#include <SDL2pp/SDL2pp.hh>
+#include <SDL2pp/SDL.hh>
+#include <SDL2pp/Exception.hh>
+#include <SDL2pp/Window.hh>
+#include <SDL2pp/Renderer.hh>
+#include <SDL2pp/Texture.hh>
 
 #include "datamanager.hh"
 
@@ -44,6 +48,8 @@ int realmain(int argc, char** argv) {
 	SDL2pp::Window window("OpenDaed", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+	SDL2pp::Texture interface(renderer, data_manager.GetPath("images/intrface.bmp"));
+
 	while (1) {
 		// Process events
 		SDL_Event event;
@@ -61,6 +67,8 @@ int realmain(int argc, char** argv) {
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
+
+		renderer.Copy(interface, SDL2pp::Rect::Null(), SDL2pp::Rect(0, 0, 640, 480));
 
 		renderer.Present();
 
