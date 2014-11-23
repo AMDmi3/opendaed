@@ -21,14 +21,24 @@
 #define DATAMANAGER_HH
 
 #include <string>
+#include <map>
 
 class DataManager {
-public:
-	DataManager(const std::string& datapath) {
-	}
+protected:
+	typedef std::map<std::string, std::string> PathMap;
 
-	~DataManager() {
-	}
+protected:
+	PathMap data_files_;
+
+private:
+	void ScanDir(const std::string& path, std::function<void(const std::string&, const std::string&)> processor);
+
+public:
+	DataManager();
+	~DataManager();
+
+	void ScanDir(const std::string& datapath);
+	std::string GetPath(const std::string& path) const;
 };
 
 #endif // DATAMANAGER_HH

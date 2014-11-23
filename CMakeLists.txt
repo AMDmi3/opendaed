@@ -14,6 +14,7 @@ ADD_SUBDIRECTORY(extlibs/SDL2pp)
 # sources
 SET(OPENDAED_SOURCES
 	main.cc
+	datamanager.cc
 )
 
 # binary

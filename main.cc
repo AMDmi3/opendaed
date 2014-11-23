@@ -36,7 +36,8 @@ int realmain(int argc, char** argv) {
 	}
 
 	// Data manager
-	DataManager data(argv[1]);
+	DataManager data_manager;
+	data_manager.ScanDir(argv[1]);
 
 	// SDL stuff
 	SDL2pp::SDL sdl(SDL_INIT_VIDEO);
