@@ -28,6 +28,7 @@
 #include <SDL2pp/Texture.hh>
 
 #include "datamanager.hh"
+#include "gameinterface.hh"
 
 void usage(const char* progname) {
 	std::cerr << "Usage: " << progname << " <path to data directory>" << std::endl;
@@ -48,7 +49,7 @@ int realmain(int argc, char** argv) {
 	SDL2pp::Window window("OpenDaed", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	SDL2pp::Texture interface(renderer, data_manager.GetPath("images/intrface.bmp"));
+	GameInterface interface(renderer, data_manager);
 
 	while (1) {
 		// Process events
@@ -62,13 +63,15 @@ int realmain(int argc, char** argv) {
 					return 0;
 				}
 			}
+
+
 		}
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
-		renderer.Copy(interface, SDL2pp::Rect::Null(), SDL2pp::Rect(0, 0, 640, 480));
+		interface.Render();
 
 		renderer.Present();
 

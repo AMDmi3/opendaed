@@ -17,6 +17,7 @@ ADD_SUBDIRECTORY(extlibs/SDL2pp)
 SET(OPENDAED_SOURCES
 	main.cc
 	datamanager.cc
+	gameinterface.cc
 )
 
 # binary
