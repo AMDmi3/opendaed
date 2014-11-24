@@ -64,8 +64,11 @@ int realmain(int argc, char** argv) {
 				}
 			}
 
-
+			interface.ProcessEvent(event);
 		}
+
+		// Update logic
+		interface.Update(SDL_GetTicks());
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);

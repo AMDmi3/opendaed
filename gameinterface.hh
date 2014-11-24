@@ -27,9 +27,82 @@
 
 class GameInterface {
 protected:
+	struct Constants {
+		static constexpr unsigned int ControlDelayMs = 500;
+	};
+
+	enum class Texture {
+		FNHILITE,
+		MLHILITE,
+	};
+
+	enum class Control {
+		NONE,
+
+		LASER,
+
+		ANALYSIS,
+		DIAGNOSTICS,
+		YES,
+		NO,
+		STATUS,
+
+		PROBE_STARTUP,
+		PROBE_DEPLOY,
+		PROBE_GRAPPLE_ARM,
+		PROBE_FLOODLIGHT,
+
+		WOUND,
+
+		PATTERN_PREV,
+		PATTERN_SEND,
+		PATTERN_NEXT,
+
+		COLORS_IR,
+		COLORS_VIS,
+		COLORS_UV,
+
+		COLORS_1,
+		COLORS_2,
+		COLORS_3,
+		COLORS_4,
+		COLORS_5,
+		COLORS_6,
+	};
+
+	enum class ColorsMode {
+		IR,
+		VIS,
+		UV,
+	};
+
+	struct ControlInfo {
+		Texture texture;
+		SDL2pp::Rect rect;
+		SDL2pp::Rect source_rect;
+	};
+
+	typedef std::map<Control, ControlInfo> ControlMap;
+
+protected:
+	static const ControlMap controls_;
+
+protected:
 	SDL2pp::Renderer& renderer_;
 
+	// Textures
 	SDL2pp::Texture background_;
+	SDL2pp::Texture fnhighlights_;
+	SDL2pp::Texture mlhighlights_;
+
+	// Click processing
+	Control currently_activated_control_;
+	unsigned int control_activation_time_;
+
+	ColorsMode colors_mode_;
+
+protected:
+	void ProcessControlAction(Control control);
 
 public:
 	GameInterface(SDL2pp::Renderer& renderer, const DataManager& datamanager);
@@ -37,7 +110,8 @@ public:
 
 	void Render();
 
-	void ProcessEvents();
+	void Update(unsigned int ticks);
+	void ProcessEvent(const SDL_Event& event);
 };
 
 #endif // GAMEINTERFACE_HH

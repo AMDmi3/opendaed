@@ -17,11 +17,51 @@
  * along with opendaed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <SDL2/SDL_events.h>
+
 #include "gameinterface.hh"
+
+constexpr unsigned int GameInterface::Constants::ControlDelayMs;
+
+const GameInterface::ControlMap GameInterface::controls_ = {
+	{ GameInterface::Control::LASER, { GameInterface::Texture::FNHILITE, { 28, 18, 55, 43 }, { 0, 173, 55, 43 } } },
+
+	{ GameInterface::Control::ANALYSIS, { GameInterface::Texture::FNHILITE, { 10, 101, 90, 18 }, { 0, 0, 90, 18 } } },
+	{ GameInterface::Control::DIAGNOSTICS, { GameInterface::Texture::FNHILITE, { 39, 141, 80, 18 }, { 0, 19, 80, 18 } } },
+	{ GameInterface::Control::YES, { GameInterface::Texture::FNHILITE, { 26, 181, 36, 16 }, { 0, 38, 36, 16 } } },
+	{ GameInterface::Control::NO, { GameInterface::Texture::FNHILITE, { 74, 181, 25, 16 }, { 48, 38, 25, 16 } } },
+	{ GameInterface::Control::STATUS, { GameInterface::Texture::FNHILITE, { 49, 214, 53, 16 }, { 0, 55, 53, 16 } } },
+
+	{ GameInterface::Control::PROBE_STARTUP, { GameInterface::Texture::FNHILITE, { 37, 276, 69, 19 }, { 0, 72, 69, 19 } } },
+	{ GameInterface::Control::PROBE_DEPLOY, { GameInterface::Texture::FNHILITE, { 43, 314, 57, 17 }, { 0, 92, 57, 17 } } },
+	{ GameInterface::Control::PROBE_GRAPPLE_ARM, { GameInterface::Texture::FNHILITE, { 34, 345, 90, 20 }, { 0, 110, 90, 20 } } },
+	{ GameInterface::Control::PROBE_FLOODLIGHT,  { GameInterface::Texture::FNHILITE, { 35, 383, 75, 20 }, { 0, 151, 75, 20 } } },
+
+	{ GameInterface::Control::WOUND, { GameInterface::Texture::FNHILITE, { 170, 0, 90, 51 }, { 0, 217, 90, 51 } } },
+
+	{ GameInterface::Control::PATTERN_PREV, { GameInterface::Texture::MLHILITE, { 171, 326, 38, 33 }, { 1, 90, 38, 33 } } },
+	{ GameInterface::Control::PATTERN_SEND, { GameInterface::Texture::MLHILITE, { 209, 334, 48, 25 }, { 40, 90, 48, 25 } } },
+	{ GameInterface::Control::PATTERN_NEXT, { GameInterface::Texture::MLHILITE, { 257, 340, 42, 33 }, { 89, 90, 42, 33 } } },
+
+	{ GameInterface::Control::COLORS_IR, { GameInterface::Texture::MLHILITE, { 408, 288, 38, 17 }, { 81, 1, 38, 17 } } },
+	{ GameInterface::Control::COLORS_VIS, { GameInterface::Texture::MLHILITE, { 470, 285, 38, 19 }, { 41, 1, 38, 19 } } },
+	{ GameInterface::Control::COLORS_UV, { GameInterface::Texture::MLHILITE, { 531, 283, 38, 19 }, { 1, 1, 38, 19 } } },
+
+	{ GameInterface::Control::COLORS_1, { GameInterface::Texture::MLHILITE, { 402, 312, 22, 23 }, { 1, 21, 22, 23 } } },
+	{ GameInterface::Control::COLORS_2, { GameInterface::Texture::MLHILITE, { 434, 311, 21, 23 }, { 25, 21, 21, 23 } } },
+	{ GameInterface::Control::COLORS_3, { GameInterface::Texture::MLHILITE, { 462, 309, 22, 25 }, { 48, 21, 22, 25 } } },
+	{ GameInterface::Control::COLORS_4, { GameInterface::Texture::MLHILITE, { 492, 308, 23, 25 }, { 72, 21, 23, 25 } } },
+	{ GameInterface::Control::COLORS_5, { GameInterface::Texture::MLHILITE, { 522, 307, 23, 25 }, { 97, 21, 23, 25 } } },
+	{ GameInterface::Control::COLORS_6, { GameInterface::Texture::MLHILITE, { 553, 307, 23, 25 }, { 122, 21, 23, 25 } } },
+};
 
 GameInterface::GameInterface(SDL2pp::Renderer& renderer, const DataManager& datamanager)
 	: renderer_(renderer),
-	  background_(renderer, datamanager.GetPath("images/intrface.bmp")) {
+	  background_(renderer, datamanager.GetPath("images/intrface.bmp")),
+	  fnhighlights_(renderer, datamanager.GetPath("images/fnhilite.rle")),
+	  mlhighlights_(renderer, datamanager.GetPath("images/mlhilite.bmp")),
+	  currently_activated_control_(GameInterface::Control::NONE),
+	  colors_mode_(ColorsMode::VIS) {
 }
 
 GameInterface::~GameInterface() {
@@ -29,7 +69,59 @@ GameInterface::~GameInterface() {
 
 void GameInterface::Render() {
 	renderer_.Copy(background_, SDL2pp::Rect::Null(), SDL2pp::Rect(0, 0, 640, 480));
+
+	// render currently active control
+	ControlMap::const_iterator active_control_info = controls_.find(currently_activated_control_);
+	if (active_control_info != controls_.end())
+		renderer_.Copy(
+				(active_control_info->second.texture == Texture::MLHILITE) ? mlhighlights_ : fnhighlights_,
+				active_control_info->second.source_rect,
+				active_control_info->second.rect
+			);
+
+	// render ir/vis/vis color bar
+	switch (colors_mode_) {
+	case ColorsMode::IR:
+		renderer_.Copy(mlhighlights_, SDL2pp::Rect(1, 48, 176, 19), SDL2pp::Rect(404, 335, 176, 19));
+		break;
+	case ColorsMode::UV:
+		renderer_.Copy(mlhighlights_, SDL2pp::Rect(1, 69, 176, 19), SDL2pp::Rect(404, 335, 176, 19));
+		break;
+	default:
+		break;
+	}
 }
 
-void GameInterface::ProcessEvents() {
+void GameInterface::ProcessControlAction(Control control) {
+	switch (control) {
+	case Control::COLORS_IR:
+		colors_mode_ = ColorsMode::IR;
+		break;
+	case Control::COLORS_VIS:
+		colors_mode_ = ColorsMode::VIS;
+		break;
+	case Control::COLORS_UV:
+		colors_mode_ = ColorsMode::UV;
+		break;
+	default:
+		break;
+	}
+}
+
+void GameInterface::Update(unsigned int ticks) {
+	if (ticks > control_activation_time_ + GameInterface::Constants::ControlDelayMs) {
+		ProcessControlAction(currently_activated_control_);
+		currently_activated_control_ = Control::NONE;
+	}
+}
+
+void GameInterface::ProcessEvent(const SDL_Event& event) {
+	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+		for (auto& control : controls_) {
+			if (control.second.rect.Contains(SDL2pp::Point(event.button.x, event.button.y)) && currently_activated_control_ == Control::NONE) {
+				currently_activated_control_ = control.first;
+				control_activation_time_ = event.button.timestamp;
+			}
+		}
+	}
 }
