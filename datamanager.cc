@@ -86,6 +86,7 @@ std::string DataManager::GetPath(const std::string& path) const {
 	size_t slashpos = name.rfind('/');
 	if (slashpos != std::string::npos)
 		name = name.substr(slashpos + 1);
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 	PathMap::const_iterator file = data_files_.find(name);
 	if (file == data_files_.end())
