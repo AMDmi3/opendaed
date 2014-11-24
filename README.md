@@ -1,7 +1,7 @@
 # OpenDaed
 
-F/OSS reimplementation of Virgin Interactive 1995 The Daedalus
-Encounter interactive movie puzzle adventure game.
+F/OSS reimplementation of Mechadeus 1995 "The Daedalus
+Encounter" interactive movie puzzle adventure game.
 
 ## Status
 
