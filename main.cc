@@ -29,6 +29,7 @@
 
 #include "datamanager.hh"
 #include "gameinterface.hh"
+#include "interpreter.hh"
 
 void usage(const char* progname) {
 	std::cerr << "Usage: " << progname << " <path to data directory>" << std::endl;
@@ -43,6 +44,9 @@ int realmain(int argc, char** argv) {
 	// Data manager
 	DataManager data_manager;
 	data_manager.ScanDir(argv[1]);
+
+	// Script interpreter
+	Interpreter script(data_manager, "encountr.nod");
 
 	// SDL stuff
 	SDL2pp::SDL sdl(SDL_INIT_VIDEO);

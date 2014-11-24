@@ -19,6 +19,7 @@ SET(OPENDAED_SOURCES
 	datamanager.cc
 	gameinterface.cc
 	nodfile.cc
+	interpreter.cc
 )
 
 # binary
