@@ -94,12 +94,14 @@ protected:
 	SDL2pp::Texture background_;
 	SDL2pp::Texture fnhighlights_;
 	SDL2pp::Texture mlhighlights_;
+	SDL2pp::Texture patterns_;
 
 	// Click processing
 	Control currently_activated_control_;
 	unsigned int control_activation_time_;
 
 	ColorsMode colors_mode_;
+	int selected_pattern_;
 
 protected:
 	void ProcessControlAction(Control control);

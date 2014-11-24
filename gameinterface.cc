@@ -60,8 +60,10 @@ GameInterface::GameInterface(SDL2pp::Renderer& renderer, const DataManager& data
 	  background_(renderer, datamanager.GetPath("images/intrface.bmp")),
 	  fnhighlights_(renderer, datamanager.GetPath("images/fnhilite.rle")),
 	  mlhighlights_(renderer, datamanager.GetPath("images/mlhilite.bmp")),
+	  patterns_(renderer, datamanager.GetPath("images/patterns.bmp")),
 	  currently_activated_control_(GameInterface::Control::NONE),
-	  colors_mode_(ColorsMode::VIS) {
+	  colors_mode_(ColorsMode::VIS),
+	  selected_pattern_(-1) {
 }
 
 GameInterface::~GameInterface() {
@@ -90,6 +92,10 @@ void GameInterface::Render() {
 	default:
 		break;
 	}
+
+	// pattern
+	if (selected_pattern_ >= 0)
+		renderer_.Copy(patterns_, SDL2pp::Rect(0, selected_pattern_ * 36, 105, 36), SDL2pp::Rect(162, 412, 105, 36));
 }
 
 void GameInterface::ProcessControlAction(Control control) {
