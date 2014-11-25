@@ -30,6 +30,7 @@
 #include "datamanager.hh"
 #include "gameinterface.hh"
 #include "interpreter.hh"
+#include "movplayer.hh"
 
 void usage(const char* progname) {
 	std::cerr << "Usage: " << progname << " <path to data directory>" << std::endl;
@@ -55,7 +56,13 @@ int realmain(int argc, char** argv) {
 
 	GameInterface interface(renderer, data_manager);
 
+	MovPlayer mov;
+
+	mov.Play(data_manager.GetPath("tm_01.mov"), SDL_GetTicks(), 1119, 1456, [](){ std::cerr << "Movie ended" << std::endl; });
+
 	while (1) {
+		unsigned int frame_ticks = SDL_GetTicks();
+
 		// Process events
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -72,13 +79,15 @@ int realmain(int argc, char** argv) {
 		}
 
 		// Update logic
-		interface.Update(SDL_GetTicks());
+		interface.Update(frame_ticks);
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
 		interface.Render();
+		mov.UpdateFrame(renderer, frame_ticks);
+		renderer.Copy(mov.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
 
 		renderer.Present();
 

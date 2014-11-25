@@ -24,6 +24,7 @@ SET(OPENDAED_SOURCES
 	nodfile.cc
 	interpreter.cc
 	quicktime.cc
+	movplayer.cc
 )
 
 # binary
