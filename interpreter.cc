@@ -72,6 +72,11 @@ void Interpreter::Update(Uint32 current_ticks) {
 		const NodFile::Entry* current_entry = &nodfile->second.GetEntry(current_node_.second);
 		Log("interp") << "Interpreting entry " << current_node_.second << " from " << current_node_.first << ": type=" << current_entry->GetType();
 		switch (current_entry->GetType()) {
+		case 0: // death
+			{
+				Log("interp") << "  Death: should exit to menu here, but it's not implemented yet";
+				throw std::logic_error("death not implemented");
+			}
 		case 1: // no-op, mostly used by "gate" entries
 			{
 				Log("interp") << "  Nop, skipping";
@@ -93,6 +98,12 @@ void Interpreter::Update(Uint32 current_ticks) {
 					);
 				awaiting_event_ = true;
 				return;
+			}
+		case 5:
+			{
+				Log("interp") << "  Enable user interface (not implemented yet)";
+				current_node_.second += current_entry->GetDefaultOffset();
+				break;
 			}
 		default:
 			throw std::logic_error("node type processing not implemented");
