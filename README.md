@@ -6,7 +6,9 @@ Encounter" interactive movie puzzle adventure game.
 ## Status
 
 The project is currently on the early stages of development, and
-is not yet playable.
+is not yet playable, however you can already run through the very
+first scenes of the story (from beginning up to entering Vekkar
+freighter). Sound is not supported yet.
 
 ## Building
 
@@ -42,6 +44,12 @@ opendaed -d <datadir>
 You may also specify name of game scenario (.nod) file and starting
 entry number with ```-n``` and ```-e``` options respectively - it's
 useful to jump to arbitrary part of the game for debugging purposes.
+
+For instance,
+```
+opendaed -d <datadir> -n encountr.nod -e 2
+```
+is the start of the game story.
 
 ## Author
 
