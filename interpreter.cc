@@ -23,10 +23,12 @@
 #endif
 
 #include "datamanager.hh"
+#include "movplayer.hh"
+#include "gameinterface.hh"
 
 #include "interpreter.hh"
 
-Interpreter::Interpreter(const DataManager& data_manager, const std::string& startnod) {
+Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interface, MovPlayer& player, const std::string& startnod, int startentry) : data_manager_(data_manager), interface_(interface), player_(player), awaiting_event_(false) {
 	std::list<std::string> loading_queue;
 	loading_queue.push_back(startnod);
 
@@ -47,7 +49,64 @@ Interpreter::Interpreter(const DataManager& data_manager, const std::string& sta
 
 		loading_queue.pop_front();
 	}
+
+	current_node_ = std::make_pair(startnod, startentry);
 }
 
 Interpreter::~Interpreter() {
+}
+
+void Interpreter::InterruptAndGoto(int offset) {
+#ifndef NDEBUG
+	std::cerr << "interrupt received" << std::endl;
+#endif
+
+	player_.Stop();
+	current_node_.second += offset;
+	awaiting_event_ = false;
+}
+
+void Interpreter::Update(Uint32 current_ticks) {
+	if (awaiting_event_)
+		return;
+
+	while (1) {
+		NodFileMap::const_iterator nodfile = nod_files_.find(current_node_.first);
+		if (nodfile == nod_files_.end())
+			throw std::logic_error("nod file not found"); // shouldn't happend as all files are preloaded in constructor
+		const NodFile::Entry* current_entry = &nodfile->second.GetEntry(current_node_.second);
+
+#ifndef NDEBUG
+		std::cerr << "interpreting entry " << current_node_.second << " from " << current_node_.first << std::endl;
+#endif
+
+		switch (current_entry->GetType()) {
+		case 1: // gate?
+#ifndef NDEBUG
+			std::cerr << "	gate, skipping" << std::endl;
+#endif
+			current_node_.second += current_entry->GetDefaultOffset();
+			break;
+		case 2: // plays video
+			{
+#ifndef NDEBUG
+				std::cerr << "	playing video fragment" << std::endl;
+#endif
+				int offset = current_entry->GetDefaultOffset();
+				player_.Play(
+						data_manager_.GetPath(current_entry->GetName()),
+						current_ticks,
+						current_entry->GetStartFrame(),
+						current_entry->GetEndFrame(),
+						[this, offset]() {
+							InterruptAndGoto(offset);
+						}
+					);
+				awaiting_event_ = true;
+				return;
+			}
+		default:
+			throw std::logic_error("node type processing not implemented");
+		}
+	}
 }

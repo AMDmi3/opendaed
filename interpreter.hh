@@ -25,17 +25,33 @@
 #include "nodfile.hh"
 
 class DataManager;
+class GameInterface;
+class MovPlayer;
 
 class Interpreter {
 protected:
 	typedef std::map<std::string, NodFile> NodFileMap;
+	typedef std::pair<std::string, int> NodPointer;
 
 protected:
 	NodFileMap nod_files_;
 
+	const DataManager& data_manager_;
+	GameInterface& interface_;
+	MovPlayer& player_;
+
+	NodPointer current_node_;
+
+	bool awaiting_event_;
+
+protected:
+	void InterruptAndGoto(int offset);
+
 public:
-	Interpreter(const DataManager& data_manager, const std::string& startnod);
+	Interpreter(const DataManager& data_manager, GameInterface& interface, MovPlayer& player, const std::string& startnod, int numentry = 0);
 	~Interpreter();
+
+	void Update(Uint32 current_ticks);
 };
 
 #endif // INTERPRETER_HH

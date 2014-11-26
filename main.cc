@@ -46,19 +46,16 @@ int realmain(int argc, char** argv) {
 	DataManager data_manager;
 	data_manager.ScanDir(argv[1]);
 
-	// Script interpreter
-	Interpreter script(data_manager, "encountr.nod");
-
 	// SDL stuff
 	SDL2pp::SDL sdl(SDL_INIT_VIDEO);
 	SDL2pp::Window window("OpenDaed", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	GameInterface interface(renderer, data_manager);
+	MovPlayer player;
 
-	MovPlayer mov;
-
-	mov.Play(data_manager.GetPath("tm_01.mov"), SDL_GetTicks(), 1119, 1456, [](){ std::cerr << "Movie ended" << std::endl; });
+	// Script interpreter
+	Interpreter script(data_manager, interface, player, "encountr.nod", 2);
 
 	while (1) {
 		unsigned int frame_ticks = SDL_GetTicks();
@@ -80,14 +77,15 @@ int realmain(int argc, char** argv) {
 
 		// Update logic
 		interface.Update(frame_ticks);
+		script.Update(frame_ticks);
+		player.UpdateFrame(renderer, frame_ticks);
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
 		interface.Render();
-		mov.UpdateFrame(renderer, frame_ticks);
-		renderer.Copy(mov.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
+		renderer.Copy(player.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
 
 		renderer.Present();
 
