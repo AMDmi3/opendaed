@@ -57,6 +57,8 @@ void Interpreter::InterruptAndGoto(int offset) {
 	Log("interp") << "Interrupt received";
 
 	player_.Stop();
+	interface_.ResetHandlers();
+
 	current_node_.second += offset;
 	awaiting_event_ = false;
 }
@@ -85,6 +87,27 @@ void Interpreter::Update(Uint32 current_ticks) {
 			}
 		case 2: // simple "play movie" command
 			{
+				interface_.ResetHandlers();
+				for (auto& condition : current_entry->GetConditions()) {
+					Log("interp") << "  Installing interface control handler: condition=" << condition.first;
+					switch (condition.first) {
+					case (int)NodFile::Condition::YES:
+						interface_.InstallHandler(GameInterface::Control::YES, [=]() {
+									InterruptAndGoto(condition.second);
+								}
+							);
+						break;
+					case (int)NodFile::Condition::NO:
+						interface_.InstallHandler(GameInterface::Control::NO, [=]() {
+									InterruptAndGoto(condition.second);
+								}
+							);
+						break;
+					default:
+						throw std::logic_error("condition type not implemented");
+					}
+				}
+
 				Log("interp") << "  Playing a movie";
 				int offset = current_entry->GetDefaultOffset();
 				player_.Play(
@@ -92,7 +115,7 @@ void Interpreter::Update(Uint32 current_ticks) {
 						current_ticks,
 						current_entry->GetStartFrame(),
 						current_entry->GetEndFrame(),
-						[this, offset]() {
+						[=]() {
 							InterruptAndGoto(offset);
 						}
 					);
