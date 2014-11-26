@@ -20,6 +20,8 @@
 #ifndef GAMEINTERFACE_HH
 #define GAMEINTERFACE_HH
 
+#include <map>
+
 #include <SDL2/SDL_events.h>
 
 #include <SDL2pp/Texture.hh>
@@ -28,16 +30,7 @@
 #include "datamanager.hh"
 
 class GameInterface {
-protected:
-	struct Constants {
-		static constexpr unsigned int ControlDelayMs = 500;
-	};
-
-	enum class Texture {
-		FNHILITE,
-		MLHILITE,
-	};
-
+public:
 	enum class Control {
 		NONE,
 
@@ -72,6 +65,16 @@ protected:
 		COLORS_6,
 	};
 
+protected:
+	struct Constants {
+		static constexpr unsigned int ControlDelayMs = 500;
+	};
+
+	enum class Texture {
+		FNHILITE,
+		MLHILITE,
+	};
+
 	enum class ColorsMode {
 		IR,
 		VIS,
@@ -85,6 +88,8 @@ protected:
 	};
 
 	typedef std::map<Control, ControlInfo> ControlMap;
+
+	typedef std::map<Control, std::function<void()>> ControlHandlerMap;
 
 protected:
 	static const ControlMap controls_;
@@ -105,6 +110,8 @@ protected:
 	ColorsMode colors_mode_;
 	int selected_pattern_;
 
+	ControlHandlerMap control_handlers_;
+
 protected:
 	void ProcessControlAction(Control control);
 
@@ -116,6 +123,9 @@ public:
 
 	void Update(unsigned int ticks);
 	void ProcessEvent(const SDL_Event& event);
+
+	void ResetHandlers();
+	void InstallHandler(Control control, std::function<void()>&& handler);
 };
 
 #endif // GAMEINTERFACE_HH

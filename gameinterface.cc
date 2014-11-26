@@ -110,6 +110,11 @@ void GameInterface::ProcessControlAction(Control control) {
 		colors_mode_ = ColorsMode::UV;
 		break;
 	default:
+		{
+			ControlHandlerMap::iterator handled_control = control_handlers_.find(control);
+			if (handled_control != control_handlers_.end())
+				handled_control->second();
+		}
 		break;
 	}
 }
@@ -130,4 +135,12 @@ void GameInterface::ProcessEvent(const SDL_Event& event) {
 			}
 		}
 	}
+}
+
+void GameInterface::ResetHandlers() {
+	control_handlers_.clear();
+}
+
+void GameInterface::InstallHandler(Control control, std::function<void()>&& handler) {
+	control_handlers_.emplace(control, handler);
 }
