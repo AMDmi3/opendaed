@@ -51,6 +51,8 @@ NodFile::~NodFile() {
 }
 
 const NodFile::Entry& NodFile::GetEntry(int index) const {
+	if (index < 0 || index >= (int)entries_.size())
+		throw std::runtime_error("entry does not exists in nod file");
 	return entries_[index];
 }
 
