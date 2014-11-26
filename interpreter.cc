@@ -18,6 +18,7 @@
  */
 
 #include <list>
+#include <algorithm>
 
 #include "logger.hh"
 
