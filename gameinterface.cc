@@ -32,10 +32,10 @@ const GameInterface::ControlMap GameInterface::controls_ = {
 	{ GameInterface::Control::NO, { GameInterface::Texture::FNHILITE, { 74, 181, 25, 16 }, { 48, 38, 25, 16 } } },
 	{ GameInterface::Control::STATUS, { GameInterface::Texture::FNHILITE, { 49, 214, 53, 16 }, { 0, 55, 53, 16 } } },
 
-	{ GameInterface::Control::PROBE_STARTUP, { GameInterface::Texture::FNHILITE, { 37, 276, 69, 19 }, { 0, 72, 69, 19 } } },
-	{ GameInterface::Control::PROBE_DEPLOY, { GameInterface::Texture::FNHILITE, { 43, 314, 57, 17 }, { 0, 92, 57, 17 } } },
-	{ GameInterface::Control::PROBE_GRAPPLE_ARM, { GameInterface::Texture::FNHILITE, { 34, 345, 90, 20 }, { 0, 110, 90, 20 } } },
-	{ GameInterface::Control::PROBE_FLOODLIGHT,  { GameInterface::Texture::FNHILITE, { 35, 383, 75, 20 }, { 0, 151, 75, 20 } } },
+	{ GameInterface::Control::STARTUP, { GameInterface::Texture::FNHILITE, { 37, 276, 69, 19 }, { 0, 72, 69, 19 } } },
+	{ GameInterface::Control::DEPLOY, { GameInterface::Texture::FNHILITE, { 43, 314, 57, 17 }, { 0, 92, 57, 17 } } },
+	{ GameInterface::Control::GRAPPLE_ARM, { GameInterface::Texture::FNHILITE, { 34, 345, 90, 20 }, { 0, 110, 90, 20 } } },
+	{ GameInterface::Control::FLOODLIGHT,  { GameInterface::Texture::FNHILITE, { 35, 383, 75, 20 }, { 0, 151, 75, 20 } } },
 
 	{ GameInterface::Control::WOUND, { GameInterface::Texture::FNHILITE, { 170, 0, 90, 51 }, { 0, 217, 90, 51 } } },
 
