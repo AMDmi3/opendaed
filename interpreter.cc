@@ -39,7 +39,7 @@ Interpreter::Interpreter(const DataManager& data_manager, const std::string& sta
 		// collect all .nod files referenced by recently
 		// loaded one which were not yet visited
 		just_added->second.ForEach([this, &loading_queue](const NodFile::Entry& e) {
-				std::string file = e.file;
+				std::string file = e.GetName();
 				std::transform(file.begin(), file.end(), file.begin(), ::tolower);
 				if (file.rfind(".nod") == file.length() - 4 && file != "gate.nod" && nod_files_.find(file) == nod_files_.end())
 					loading_queue.push_back(file);

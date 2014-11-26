@@ -27,8 +27,15 @@ class NodFile {
 public:
 	struct Entry {
 		int number;
-		std::string file;
+		std::string name;
 		int fields[24];
+
+		int GetType() const { return fields[0]; }
+		int GetStartFrame() const { return fields[1]; }
+		int GetEndFrame() const { return fields[2]; }
+		const std::string GetName() const { return name; }
+
+		int GetDefaultOffset() const { return fields[5]; }
 	};
 
 protected:

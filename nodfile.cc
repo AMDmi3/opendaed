@@ -30,7 +30,7 @@ NodFile::NodFile(const std::string& path) {
 	int index = 0;
 	while (!stream.eof()) {
 		Entry e;
-		stream >> e.number >> e.file;
+		stream >> e.number >> e.name;
 
 		for (int i = 0; i < 24; i++)
 			stream >> e.fields[i];
