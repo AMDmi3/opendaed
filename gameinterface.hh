@@ -20,6 +20,8 @@
 #ifndef GAMEINTERFACE_HH
 #define GAMEINTERFACE_HH
 
+#include <SDL2/SDL_events.h>
+
 #include <SDL2pp/Texture.hh>
 #include <SDL2pp/Renderer.hh>
 
