@@ -17,7 +17,10 @@
  * along with opendaed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <getopt.h>
+
 #include <iostream>
+#include <string>
 
 #include <SDL2/SDL.h>
 
@@ -33,18 +36,46 @@
 #include "movplayer.hh"
 
 void usage(const char* progname) {
-	std::cerr << "Usage: " << progname << " <path to data directory>" << std::endl;
+	std::cerr << "Usage: " << progname << " [ -n <start nodfile> ] [ -e <start nodfile entry> ] -d <path to data directory>" << std::endl;
 }
 
 int realmain(int argc, char** argv) {
-	if (argc != 2) {
-		usage(argv[0]);
+	const char* progname = argv[0];
+
+	const char* datapath = nullptr;
+	const char* startnod = "encountr.nod";
+	int startentry = 2;
+
+	int ch;
+	while ((ch = getopt(argc, argv, "d:n:e:h")) != -1) {
+		switch (ch) {
+		case 'd':
+			datapath = optarg;
+			break;
+		case 'n':
+			startnod = optarg;
+			startentry = 0;
+			break;
+		case 'e':
+			startentry = std::stoi(optarg);
+			break;
+		case 'h':
+			usage(progname);
+			return 0;
+		default:
+			usage(progname);
+			return 1;
+		}
+	}
+
+	if (datapath == nullptr) {
+		usage(progname);
 		return 1;
 	}
 
 	// Data manager
 	DataManager data_manager;
-	data_manager.ScanDir(argv[1]);
+	data_manager.ScanDir(datapath);
 
 	// SDL stuff
 	SDL2pp::SDL sdl(SDL_INIT_VIDEO);
@@ -55,7 +86,7 @@ int realmain(int argc, char** argv) {
 	MovPlayer player;
 
 	// Script interpreter
-	Interpreter script(data_manager, interface, player, "encountr.nod", 2);
+	Interpreter script(data_manager, interface, player, startnod, startentry);
 
 	while (1) {
 		unsigned int frame_ticks = SDL_GetTicks();

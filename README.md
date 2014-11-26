@@ -29,9 +29,19 @@ cmake . && make
 
 ## Running
 
-To run the games, you need original game data. Specify path to data
+To run the game, you need original game data. Specify path to data
 directory (it may be either CD-ROM mount point or a directory
-containing contents of game CDs) as an only argument.
+containing contents of all game CDs; directory structure doesn't
+really matter in the latter case, game will find needed data in
+subdirectories automatically) with ```-d``` options:
+
+```
+opendaed -d <datadir>
+```
+
+You may also specify name of game scenario (.nod) file and starting
+entry number with ```-n``` and ```-e``` options respectively - it's
+useful to jump to arbitrary part of the game for debugging purposes.
 
 ## Author
 
