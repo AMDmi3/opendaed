@@ -29,6 +29,10 @@ public:
 	enum class Condition {
 		NO = 104,
 		YES = 103,
+		STARTUP = 111,
+		DIAGNOSTICS = 102,
+		DEPLOY = 114,
+		ANALYSIS = 121,
 	};
 
 	struct Entry {
