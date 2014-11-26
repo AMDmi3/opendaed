@@ -20,9 +20,8 @@
 #include <dirent.h>
 
 #include <algorithm>
-#ifndef NDEBUG
-#	include <iostream>
-#endif
+
+#include "logger.hh"
 
 #include "datamanager.hh"
 
@@ -72,11 +71,9 @@ void DataManager::ScanDir(const std::string& datapath) {
 
 	data_files_.swap(new_files);
 
-#ifndef NDEBUG
-	std::cerr << "Found data files in " << datapath << ":" << std::endl;
+	Log("datamgr") << "Found data files in " << datapath << ":";
 	for (auto& file: data_files_)
-		std::cerr << "    " << file.first << " -> " << file.second << std::endl;
-#endif
+		Log("datamgr") << "  " << file.first << " -> " << file.second;
 }
 
 std::string DataManager::GetPath(const std::string& path) const {
@@ -92,5 +89,6 @@ std::string DataManager::GetPath(const std::string& path) const {
 	if (file == data_files_.end())
 		throw std::runtime_error("required data file not found");
 
+	Log("datamgr") << "Returning " << file->second << " for " << path;
 	return file->second;
 }

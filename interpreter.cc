@@ -18,9 +18,8 @@
  */
 
 #include <list>
-#ifndef NDEBUG
-#	include <iostream>
-#endif
+
+#include "logger.hh"
 
 #include "datamanager.hh"
 #include "movplayer.hh"
@@ -33,9 +32,7 @@ Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interfa
 	loading_queue.push_back(startnod);
 
 	while (!loading_queue.empty()) {
-#ifndef NDEBUG
-		std::cerr << "Loading script " << loading_queue.front() << std::endl;
-#endif
+		Log("interp") << "Loading script" << loading_queue.front();
 		NodFileMap::iterator just_added = nod_files_.emplace(loading_queue.front(), data_manager.GetPath(loading_queue.front())).first;
 
 		// collect all .nod files referenced by recently
@@ -57,9 +54,7 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::InterruptAndGoto(int offset) {
-#ifndef NDEBUG
-	std::cerr << "interrupt received" << std::endl;
-#endif
+	Log("interp") << "Interrupt received";
 
 	player_.Stop();
 	current_node_.second += offset;
@@ -75,23 +70,17 @@ void Interpreter::Update(Uint32 current_ticks) {
 		if (nodfile == nod_files_.end())
 			throw std::logic_error("nod file not found"); // shouldn't happend as all files are preloaded in constructor
 		const NodFile::Entry* current_entry = &nodfile->second.GetEntry(current_node_.second);
-
-#ifndef NDEBUG
-		std::cerr << "interpreting entry " << current_node_.second << " from " << current_node_.first << std::endl;
-#endif
-
+		Log("interp") << "Interpreting entry " << current_node_.second << " from " << current_node_.first << ": type=" << current_entry->GetType();
 		switch (current_entry->GetType()) {
-		case 1: // gate?
-#ifndef NDEBUG
-			std::cerr << "	gate, skipping" << std::endl;
-#endif
-			current_node_.second += current_entry->GetDefaultOffset();
-			break;
-		case 2: // plays video
+		case 1: // no-op, mostly used by "gate" entries
 			{
-#ifndef NDEBUG
-				std::cerr << "	playing video fragment" << std::endl;
-#endif
+				Log("interp") << "  Nop, skipping";
+				current_node_.second += current_entry->GetDefaultOffset();
+				break;
+			}
+		case 2: // simple "play movie" command
+			{
+				Log("interp") << "  Playing a movie";
 				int offset = current_entry->GetDefaultOffset();
 				player_.Play(
 						data_manager_.GetPath(current_entry->GetName()),
