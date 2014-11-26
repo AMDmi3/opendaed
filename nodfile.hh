@@ -22,10 +22,18 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class NodFile {
 public:
+	enum class Condition {
+		NO = 104,
+		YES = 103,
+	};
+
 	struct Entry {
+		typedef std::map<int, int> ConditionMap;
+
 		int number;
 		std::string name;
 		int fields[24];
@@ -36,6 +44,14 @@ public:
 		const std::string GetName() const { return name; }
 
 		int GetDefaultOffset() const { return fields[5]; }
+
+		ConditionMap GetConditions() const {
+			ConditionMap conds;
+			for (int i = 6; i <= 20; i += 2)
+				if (fields[i+1] != 0)
+					conds[fields[i+1]] = fields[i];
+			return conds;
+		}
 	};
 
 protected:
