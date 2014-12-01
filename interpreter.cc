@@ -33,7 +33,7 @@ Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interfa
 	loading_queue.push_back(startnod);
 
 	while (!loading_queue.empty()) {
-		Log("interp") << "Loading script" << loading_queue.front();
+		Log("interp") << "Loading script " << loading_queue.front();
 		NodFileMap::iterator just_added = nod_files_.emplace(loading_queue.front(), data_manager.GetPath(loading_queue.front())).first;
 
 		// collect all .nod files referenced by recently
