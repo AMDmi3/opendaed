@@ -40,8 +40,29 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 		if (!qt_->HasVideo())
 			throw std::runtime_error("no video track");
 
+		if (!qt_->SupportedVideo())
+			throw std::runtime_error("video track not supported");
+
+		if (qt_->HasAudio()) {
+			if (!qt_->SupportedAudio())
+				throw std::runtime_error("audio track not supported");
+		}
+
 		current_frame_ = -1;
 		next_frame_ = 0;
+	}
+
+	Log("player") << "  video:";
+	Log("player") << "    dimensions: " << qt_->GetWidth() << "x" << qt_->GetHeight();
+	Log("player") << "    frame rate: " << (float)qt_->GetTimeScale() / (float)qt_->GetFrameDuration() << " fps";
+	Log("player") << "    pts offset: " << (float)qt_->GetVideoPtsOffset() / (float)qt_->GetFrameDuration() << " frames";
+
+	if (qt_->HasAudio()) {
+		Log("player") << "  audio:";
+		Log("player") << "    sample rate: " << qt_->GetSampleRate();
+		Log("player") << "    audio bits: " << qt_->GetAudioBits();
+		Log("player") << "    channels: " << qt_->GetTrackChannels();
+		Log("player") << "    pts offset: " << qt_->GetAudioPtsOffset() << " samples";
 	}
 
 	finish_callback_ = finish_callback;
