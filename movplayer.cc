@@ -55,7 +55,7 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 }
 
 void MovPlayer::Stop() {
-	Log("player") << "Stopping";
+	Log("player") << "stopping";
 	playing_ = false;
 }
 
@@ -101,7 +101,7 @@ void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
 	current_frame_ = next_frame_++;
 
 	if (current_frame_ >= end_frame_) {
-		Log("player") << "Movie finished";
+		Log("player") << "movie finished";
 		finish_callback_();
 		playing_ = false;
 	}

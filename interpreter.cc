@@ -33,7 +33,7 @@ Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interfa
 	loading_queue.push_back(startnod);
 
 	while (!loading_queue.empty()) {
-		Log("interp") << "Loading script " << loading_queue.front();
+		Log("interp") << "loading script " << loading_queue.front();
 		NodFileMap::iterator just_added = nod_files_.emplace(loading_queue.front(), data_manager.GetPath(loading_queue.front())).first;
 
 		// collect all .nod files referenced by recently
@@ -55,7 +55,7 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::InterruptAndGoto(int offset) {
-	Log("interp") << "Interrupt received";
+	Log("interp") << "interrupt received";
 
 	player_.Stop();
 	interface_.ResetHandlers();
@@ -73,16 +73,16 @@ void Interpreter::Update(Uint32 current_ticks) {
 		if (nodfile == nod_files_.end())
 			throw std::logic_error("nod file not found"); // shouldn't happend as all files are preloaded in constructor
 		const NodFile::Entry* current_entry = &nodfile->second.GetEntry(current_node_.second);
-		Log("interp") << "Interpreting entry " << current_node_.second << " from " << current_node_.first << ": type=" << current_entry->GetType();
+		Log("interp") << "interpreting entry " << current_node_.second << " from " << current_node_.first << ": type=" << current_entry->GetType();
 		switch (current_entry->GetType()) {
 		case 0: // death
 			{
-				Log("interp") << "  Death: should exit to menu here, but it's not implemented yet";
+				Log("interp") << "  death: should exit to menu here, but it's not implemented yet";
 				throw std::logic_error("death not implemented");
 			}
 		case 1: // no-op, mostly used by "gate" entries
 			{
-				Log("interp") << "  Nop, skipping";
+				Log("interp") << "  nop, skipping";
 				current_node_.second += current_entry->GetDefaultOffset();
 				break;
 			}
@@ -91,7 +91,7 @@ void Interpreter::Update(Uint32 current_ticks) {
 			{
 				interface_.ResetHandlers();
 				for (auto& condition : current_entry->GetConditions()) {
-					Log("interp") << "  Installing interface control handler: condition=" << condition.first;
+					Log("interp") << "  installing interface control handler: condition=" << condition.first;
 					switch (condition.first) {
 					case (int)NodFile::Condition::YES:
 						interface_.InstallHandler(GameInterface::Control::YES, [=]() { InterruptAndGoto(condition.second); } );
@@ -116,7 +116,7 @@ void Interpreter::Update(Uint32 current_ticks) {
 					}
 				}
 
-				Log("interp") << "  Playing a movie";
+				Log("interp") << "  playing a movie";
 				int offset = current_entry->GetDefaultOffset();
 				player_.Play(
 						data_manager_.GetPath(current_entry->GetName()),
@@ -132,7 +132,7 @@ void Interpreter::Update(Uint32 current_ticks) {
 			}
 		case 5:
 			{
-				Log("interp") << "  Enable user interface (not implemented yet)";
+				Log("interp") << "  enable user interface (not implemented yet)";
 				current_node_.second += current_entry->GetDefaultOffset();
 				break;
 			}
