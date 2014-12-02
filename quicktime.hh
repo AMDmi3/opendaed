@@ -36,18 +36,31 @@ public:
 
 	// video
 	bool HasVideo() const;
+	bool SupportedVideo(int track = 0) const;
 
 	int GetWidth(int track = 0) const;
 	int GetHeight(int track = 0) const;
+	int GetTimeScale(int track = 0) const;
+	int GetFrameDuration(int track = 0) const;
+	int64_t GetVideoPtsOffset(int track = 0) const;
 
 	int SetVideoPosition(int64_t frame, int track = 0);
 
-	int GetTimeScale(int track = 0);
-
-	int GetFrameDuration(int track = 0);
-
 	int DecodeVideo(unsigned char** row_pointers, int track = 0);
 	int DecodeVideo(unsigned char* pixels, int pitch, int track = 0);
+
+	// audio
+	bool HasAudio() const;
+	bool SupportedAudio(int track = 0) const;
+
+	long GetSampleRate(int track = 0) const;
+	int GetAudioBits(int track = 0) const;
+	int GetTrackChannels(int track = 0) const;
+	int64_t GetAudioPtsOffset(int track = 0) const;
+
+	int SetAudioPosition(int64_t sample, int track = 0);
+
+	int DecodeAudio(int16_t* output_i, float* output_f, long samples, int track = 0);
 };
 
 #endif // QUICKTIME_HH
