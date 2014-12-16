@@ -78,7 +78,7 @@ int realmain(int argc, char** argv) {
 	data_manager.ScanDir(datapath);
 
 	// SDL stuff
-	SDL2pp::SDL sdl(SDL_INIT_VIDEO);
+	SDL2pp::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	SDL2pp::Window window("OpenDaed", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 

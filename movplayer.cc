@@ -88,6 +88,22 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 
 	start_frame_ticks_ = startticks;
 
+	// setup audio
+	audio_.reset(nullptr);
+	if (has_audio) {
+		SDL2pp::AudioSpec spec(qt_->GetSampleRate(), AUDIO_U8, qt_->GetTrackChannels(), 4096);
+		audio_.reset(new SDL2pp::AudioDevice("", false, spec,
+				[this](Uint8* stream, int len) {
+					qt_->DecodeAudioRaw(stream, len / qt_->GetTrackChannels());
+				}
+			));
+
+		float audiopos = (float)startframe * (float)qt_->GetFrameDuration() / (float)qt_->GetTimeScale() * qt_->GetSampleRate();
+		qt_->SetAudioPosition((int)audiopos);
+
+		audio_->Pause(false);
+	}
+
 	playing_ = true;
 }
 
@@ -139,6 +155,8 @@ void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
 
 	if (current_frame_ >= end_frame_) {
 		Log("player") << "movie finished";
+		if (audio_.get())
+			audio_->Pause(true);
 		finish_callback_();
 		playing_ = false;
 	}

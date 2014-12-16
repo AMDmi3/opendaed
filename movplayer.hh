@@ -26,6 +26,7 @@
 
 #include <SDL2pp/Renderer.hh>
 #include <SDL2pp/Texture.hh>
+#include <SDL2pp/Audio.hh>
 
 #include "quicktime.hh"
 
@@ -34,8 +35,10 @@ public:
 	typedef std::function<void()> Callback;
 
 protected:
-	std::unique_ptr<QuickTime> qt_;
 	std::unique_ptr<SDL2pp::Texture> texture_;
+	std::unique_ptr<SDL2pp::AudioDevice> audio_;
+
+	std::unique_ptr<QuickTime> qt_;
 
 	std::string current_file_;
 
