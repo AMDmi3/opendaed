@@ -33,6 +33,7 @@ MovPlayer::~MovPlayer() {
 
 void MovPlayer::Play(const std::string& filename, unsigned int startticks, int startframe, int endframe, Callback&& finish_callback) {
 	Log("player") << "playing " << filename << " at [" << startframe << ".." << endframe << "]";
+	bool has_audio = false;
 	if (filename != current_file_ || qt_.get() == nullptr) {
 		// open new qt video
 		qt_.reset(new QuickTime(filename));
@@ -46,20 +47,35 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 		if (qt_->HasAudio()) {
 			if (!qt_->SupportedAudio())
 				throw std::runtime_error("audio track not supported");
+			has_audio = true;
 		}
 
 		current_frame_ = -1;
 		next_frame_ = 0;
 	}
 
+	// print some info
 	Log("player") << "  video:";
 	Log("player") << "    dimensions: " << qt_->GetWidth() << "x" << qt_->GetHeight();
+	Log("player") << "    time scale: " << qt_->GetTimeScale();
+	Log("player") << "    frame dur.: " << qt_->GetFrameDuration();
 	Log("player") << "    frame rate: " << (float)qt_->GetTimeScale() / (float)qt_->GetFrameDuration() << " fps";
-	Log("player") << "    pts offset: " << (float)qt_->GetVideoPtsOffset() / (float)qt_->GetFrameDuration() << " frames";
+	Log("player") << "    pts offset: " << qt_->GetVideoPtsOffset() << " (" << (float)qt_->GetVideoPtsOffset() / (float)qt_->GetFrameDuration() << " frames)";
 
 	if (qt_->HasAudio()) {
 		Log("player") << "  audio:";
 		Log("player") << "    sample rate: " << qt_->GetSampleRate();
+		std::string format = "unknown";
+		switch (qt_->GetSampleFormat()) {
+		case LQT_SAMPLE_INT8: format = "s8"; break;
+		case LQT_SAMPLE_UINT8: format = "u8"; break;
+		case LQT_SAMPLE_INT16: format = "s16"; break;
+		case LQT_SAMPLE_INT32: format = "s32"; break;
+		case LQT_SAMPLE_FLOAT: format = "float"; break;
+		case LQT_SAMPLE_DOUBLE: format = "double"; break;
+		default: break;
+		}
+		Log("player") << "    sample format: " << format;
 		Log("player") << "    audio bits: " << qt_->GetAudioBits();
 		Log("player") << "    channels: " << qt_->GetTrackChannels();
 		Log("player") << "    pts offset: " << qt_->GetAudioPtsOffset() << " samples";
