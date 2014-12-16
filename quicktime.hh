@@ -62,7 +62,9 @@ public:
 	int SetAudioPosition(int64_t sample, int track = 0);
 	int64_t LastAudioPosition(int track = 0) const;
 
-	int DecodeAudio(int16_t* output_i, float* output_f, long samples, int track = 0);
+	int DecodeAudioTrack(int16_t** output_i, float** output_f, long samples, int track = 0);
+	int DecodeAudioTrackInterleaved(int16_t* output_i, float* output_f, long samples, int track = 0);
+	int DecodeAudioRaw(void* output, long samples, int track = 0);
 };
 
 #endif // QUICKTIME_HH

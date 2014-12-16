@@ -122,15 +122,38 @@ int64_t QuickTime::LastAudioPosition(int track) const {
 	return lqt_last_audio_position(qt_, track);
 }
 
-int QuickTime::DecodeAudio(int16_t* output_i, float* output_f, long samples, int track) {
-	std::vector<int16_t*> output_i_vec(lqt_total_channels(qt_), nullptr);
-	std::vector<float*> output_f_vec(lqt_total_channels(qt_), nullptr);
+int QuickTime::DecodeAudioTrack(int16_t** output_i, float** output_f, long samples, int track) {
+	return lqt_decode_audio_track(qt_, output_i, output_f, samples, track);
+}
+
+int QuickTime::DecodeAudioTrackInterleaved(int16_t* output_i, float* output_f, long samples, int track) {
+	std::vector<int16_t> temp_i(output_i ? GetTrackChannels(track) * samples : 0, 0);
+	std::vector<float> temp_f(output_f ? GetTrackChannels(track) * samples : 0, 0.0f);
+
+	std::vector<int16_t*> temp_p_i;
+	if (output_i)
+		for (int i = 0; i < GetTrackChannels(track); i++)
+			temp_p_i.push_back(temp_i.data() + i * samples);
+	std::vector<float*> temp_p_f;
+	if (output_f)
+		for (int i = 0; i < GetTrackChannels(track); i++)
+			temp_p_f.push_back(temp_f.data() + i * samples);
+
+	int retval = lqt_decode_audio_track(qt_, output_i ? temp_p_i.data() : nullptr, output_f ? temp_p_f.data() : nullptr, samples, track);
 
 	if (output_i)
-		output_i_vec[track] = output_i;
+		for (int s = 0; s < samples; s++)
+			for (int c = 0; c < GetTrackChannels(track); c++)
+				*(output_i++) = temp_i[c * samples + s];
 
 	if (output_f)
-		output_f_vec[track] = output_f;
+		for (int s = 0; s < samples; s++)
+			for (int c = 0; c < GetTrackChannels(track); c++)
+				*(output_f++) = temp_f[c * samples + s];
 
-	return lqt_decode_audio(qt_, output_i ? output_i_vec.data() : nullptr, output_f ? output_f_vec.data() : nullptr, samples);
+	return retval;
+}
+
+int QuickTime::DecodeAudioRaw(void* output, long samples, int track) {
+	return lqt_decode_audio_raw(qt_, output, samples, track);
 }
