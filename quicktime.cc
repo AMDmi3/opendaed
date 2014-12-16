@@ -68,6 +68,10 @@ int64_t QuickTime::GetVideoPtsOffset(int track) const {
 	return lqt_get_video_pts_offset(qt_, track);
 }
 
+lqt_sample_format_t QuickTime::GetSampleFormat(int track) const {
+	return lqt_get_sample_format(qt_, track);
+}
+
 int QuickTime::SetVideoPosition(int64_t frame, int track) {
 	return quicktime_set_video_position(qt_, frame, track);
 }

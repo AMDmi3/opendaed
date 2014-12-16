@@ -57,6 +57,7 @@ public:
 	int GetAudioBits(int track = 0) const;
 	int GetTrackChannels(int track = 0) const;
 	int64_t GetAudioPtsOffset(int track = 0) const;
+	lqt_sample_format_t GetSampleFormat(int track = 0) const;
 
 	int SetAudioPosition(int64_t sample, int track = 0);
 
