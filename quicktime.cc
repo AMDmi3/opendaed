@@ -118,6 +118,10 @@ int QuickTime::SetAudioPosition(int64_t sample, int track) {
 	return quicktime_set_audio_position(qt_, sample, track);
 }
 
+int64_t QuickTime::LastAudioPosition(int track) const {
+	return lqt_last_audio_position(qt_, track);
+}
+
 int QuickTime::DecodeAudio(int16_t* output_i, float* output_f, long samples, int track) {
 	std::vector<int16_t*> output_i_vec(lqt_total_channels(qt_), nullptr);
 	std::vector<float*> output_f_vec(lqt_total_channels(qt_), nullptr);

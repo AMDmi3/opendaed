@@ -60,6 +60,7 @@ public:
 	lqt_sample_format_t GetSampleFormat(int track = 0) const;
 
 	int SetAudioPosition(int64_t sample, int track = 0);
+	int64_t LastAudioPosition(int track = 0) const;
 
 	int DecodeAudio(int16_t* output_i, float* output_f, long samples, int track = 0);
 };
