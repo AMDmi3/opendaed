@@ -33,6 +33,7 @@ public:
 		DIAGNOSTICS = 102,
 		DEPLOY = 114,
 		ANALYSIS = 121,
+		FLOODLIGHT = 113,
 	};
 
 	struct Entry {
