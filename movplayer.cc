@@ -19,6 +19,7 @@
 
 #include <stdexcept>
 
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_render.h>
 
 #include "logger.hh"
@@ -31,9 +32,9 @@ MovPlayer::MovPlayer() : playing_(false) {
 MovPlayer::~MovPlayer() {
 }
 
-void MovPlayer::Play(const std::string& filename, unsigned int startticks, int startframe, int endframe, Callback&& finish_callback) {
+void MovPlayer::Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback) {
 	Log("player") << "playing " << filename << " at [" << startframe << ".." << endframe << "]";
-	bool has_audio = false;
+	has_audio_ = false;
 	if (filename != current_file_ || qt_.get() == nullptr) {
 		// open new qt video
 		qt_.reset(new QuickTime(filename));
@@ -47,7 +48,7 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 		if (qt_->HasAudio()) {
 			if (!qt_->SupportedAudio())
 				throw std::runtime_error("audio track not supported");
-			has_audio = true;
+			has_audio_ = true;
 		}
 
 		current_frame_ = -1;
@@ -62,7 +63,7 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 	Log("player") << "    frame rate: " << (float)qt_->GetTimeScale() / (float)qt_->GetFrameDuration() << " fps";
 	Log("player") << "    pts offset: " << qt_->GetVideoPtsOffset() << " (" << (float)qt_->GetVideoPtsOffset() / (float)qt_->GetFrameDuration() << " frames)";
 
-	if (qt_->HasAudio()) {
+	if (has_audio_) {
 		Log("player") << "  audio:";
 		Log("player") << "    sample rate: " << qt_->GetSampleRate();
 		std::string format = "unknown";
@@ -83,26 +84,27 @@ void MovPlayer::Play(const std::string& filename, unsigned int startticks, int s
 
 	finish_callback_ = finish_callback;
 
-	start_frame_ = startframe;
-	end_frame_ = endframe;
-
-	start_frame_ticks_ = startticks;
+	// setup video timing
+	start_frame_ = startframe - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
+	end_frame_ = endframe - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
 
 	// setup audio
 	audio_.reset(nullptr);
-	if (has_audio) {
-		SDL2pp::AudioSpec spec(qt_->GetSampleRate(), AUDIO_U8, qt_->GetTrackChannels(), 4096);
+	if (has_audio_) {
+		SDL2pp::AudioSpec spec(qt_->GetSampleRate(), AUDIO_U8, qt_->GetTrackChannels(), 16);
 		audio_.reset(new SDL2pp::AudioDevice("", false, spec,
 				[this](Uint8* stream, int len) {
 					qt_->DecodeAudioRaw(stream, len / qt_->GetTrackChannels());
 				}
 			));
 
-		float audiopos = (float)startframe * (float)qt_->GetFrameDuration() / (float)qt_->GetTimeScale() * qt_->GetSampleRate();
-		qt_->SetAudioPosition((int)audiopos);
+		int audiopos = (int)((float)start_frame_ * (float)qt_->GetFrameDuration() / (float)qt_->GetTimeScale() * qt_->GetSampleRate());
+		qt_->SetAudioPosition(audiopos);
 
 		audio_->Pause(false);
 	}
+
+	start_frame_ticks_ = SDL_GetTicks();
 
 	playing_ = true;
 }
@@ -112,15 +114,22 @@ void MovPlayer::Stop() {
 	playing_ = false;
 }
 
-void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
+bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
 	// not playing -> do nothing
 	if (!playing_)
 		return false;
 
+	// ensure audio callback is not called while processing this frame
+	SDL2pp::AudioDevice::LockHandle lock;
+	if (has_audio_)
+		lock = audio_->Lock();
+
 	// calculate wanted frame from given time
-	int wanted_frame = start_frame_ + (ticks - start_frame_ticks_) * qt_->GetTimeScale() / (qt_->GetFrameDuration() * 1000);
+	int wanted_frame = start_frame_ + (SDL_GetTicks() - start_frame_ticks_) * qt_->GetTimeScale() / (qt_->GetFrameDuration() * 1000) - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
 
 	// don't go past end frame
+	if (wanted_frame < 0)
+		wanted_frame = 0;
 	if (wanted_frame > end_frame_)
 		wanted_frame = end_frame_;
 

@@ -108,8 +108,8 @@ int realmain(int argc, char** argv) {
 
 		// Update logic
 		interface.Update(frame_ticks);
-		script.Update(frame_ticks);
-		bool has_video = player.UpdateFrame(renderer, frame_ticks);
+		script.Update();
+		bool has_video = player.UpdateFrame(renderer);
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);

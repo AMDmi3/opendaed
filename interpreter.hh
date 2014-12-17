@@ -51,7 +51,7 @@ public:
 	Interpreter(const DataManager& data_manager, GameInterface& interface, MovPlayer& player, const std::string& startnod, int numentry = 0);
 	~Interpreter();
 
-	void Update(Uint32 current_ticks);
+	void Update();
 };
 
 #endif // INTERPRETER_HH

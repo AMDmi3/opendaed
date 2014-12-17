@@ -64,7 +64,7 @@ void Interpreter::InterruptAndGoto(int offset) {
 	awaiting_event_ = false;
 }
 
-void Interpreter::Update(Uint32 current_ticks) {
+void Interpreter::Update() {
 	if (awaiting_event_)
 		return;
 
@@ -120,7 +120,6 @@ void Interpreter::Update(Uint32 current_ticks) {
 				int offset = current_entry->GetDefaultOffset();
 				player_.Play(
 						data_manager_.GetPath(current_entry->GetName()),
-						current_ticks,
 						current_entry->GetStartFrame(),
 						current_entry->GetEndFrame(),
 						[=]() {
