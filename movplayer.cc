@@ -115,7 +115,7 @@ void MovPlayer::Stop() {
 void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
 	// not playing -> do nothing
 	if (!playing_)
-		return;
+		return false;
 
 	// calculate wanted frame from given time
 	int wanted_frame = start_frame_ + (ticks - start_frame_ticks_) * qt_->GetTimeScale() / (qt_->GetFrameDuration() * 1000);
@@ -126,7 +126,7 @@ void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
 
 	// we already have wanted frame loaded, do nothing
 	if (current_frame_ == wanted_frame)
-		return;
+		return true;
 
 	// seek required
 	if (next_frame_ != wanted_frame) {
@@ -160,6 +160,8 @@ void MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks) {
 		finish_callback_();
 		playing_ = false;
 	}
+
+	return true;
 }
 
 SDL2pp::Texture& MovPlayer::GetTexture() {

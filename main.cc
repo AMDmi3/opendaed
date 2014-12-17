@@ -109,14 +109,15 @@ int realmain(int argc, char** argv) {
 		// Update logic
 		interface.Update(frame_ticks);
 		script.Update(frame_ticks);
-		player.UpdateFrame(renderer, frame_ticks);
+		bool has_video = player.UpdateFrame(renderer, frame_ticks);
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
 		interface.Render();
-		renderer.Copy(player.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
+		if (has_video)
+			renderer.Copy(player.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
 
 		renderer.Present();
 
