@@ -78,7 +78,7 @@ int realmain(int argc, char** argv) {
 	data_manager.ScanDir(datapath);
 
 	// SDL stuff
-	SDL2pp::SDL sdl(SDL_INIT_VIDEO);
+	SDL2pp::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	SDL2pp::Window window("OpenDaed", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -108,15 +108,16 @@ int realmain(int argc, char** argv) {
 
 		// Update logic
 		interface.Update(frame_ticks);
-		script.Update(frame_ticks);
-		player.UpdateFrame(renderer, frame_ticks);
+		script.Update();
+		bool has_video = player.UpdateFrame(renderer);
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
 		interface.Render();
-		renderer.Copy(player.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
+		if (has_video)
+			renderer.Copy(player.GetTexture(), SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
 
 		renderer.Present();
 

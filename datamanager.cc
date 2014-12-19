@@ -71,7 +71,7 @@ void DataManager::ScanDir(const std::string& datapath) {
 
 	data_files_.swap(new_files);
 
-	Log("datamgr") << "Found data files in " << datapath << ":";
+	Log("datamgr") << "found data files in " << datapath << ":";
 	for (auto& file: data_files_)
 		Log("datamgr") << "  " << file.first << " -> " << file.second;
 }
@@ -89,6 +89,6 @@ std::string DataManager::GetPath(const std::string& path) const {
 	if (file == data_files_.end())
 		throw std::runtime_error("required data file not found");
 
-	Log("datamgr") << "Returning " << file->second << " for " << path;
+	Log("datamgr") << "returning " << file->second << " for " << path;
 	return file->second;
 }

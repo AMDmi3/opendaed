@@ -26,6 +26,7 @@
 
 #include <SDL2pp/Renderer.hh>
 #include <SDL2pp/Texture.hh>
+#include <SDL2pp/Audio.hh>
 
 #include "quicktime.hh"
 
@@ -34,30 +35,31 @@ public:
 	typedef std::function<void()> Callback;
 
 protected:
-	std::unique_ptr<QuickTime> qt_;
 	std::unique_ptr<SDL2pp::Texture> texture_;
+	std::unique_ptr<SDL2pp::AudioDevice> audio_;
+
+	std::unique_ptr<QuickTime> qt_;
 
 	std::string current_file_;
 
 	Callback finish_callback_;
+	bool has_audio_;
 	bool playing_;
 
 	int start_frame_;
 	int end_frame_;
-
 	int current_frame_;
 	int next_frame_;
-
 	unsigned int start_frame_ticks_;
 
 public:
 	MovPlayer();
 	~MovPlayer();
 
-	void Play(const std::string& filename, unsigned int startticks, int startframe, int endframe, Callback&& finish_callback = [](){});
+	void Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback = [](){});
 	void Stop();
 
-	void UpdateFrame(SDL2pp::Renderer& renderer, unsigned int ticks);
+	bool UpdateFrame(SDL2pp::Renderer& renderer);
 	SDL2pp::Texture& GetTexture();
 };
 
