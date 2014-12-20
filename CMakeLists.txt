@@ -22,6 +22,7 @@ SET(OPENDAED_SOURCES
 	datamanager.cc
 	gameinterface.cc
 	nodfile.cc
+	hotfile.cc
 	interpreter.cc
 	quicktime.cc
 	movplayer.cc
