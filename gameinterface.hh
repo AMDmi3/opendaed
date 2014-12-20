@@ -129,7 +129,7 @@ public:
 	GameInterface(SDL2pp::Renderer& renderer, const DataManager& datamanager);
 	~GameInterface();
 
-	void Render();
+	void Render(SDL2pp::Texture* video);
 
 	void Update(unsigned int ticks);
 	void ProcessEvent(const SDL_Event& event);

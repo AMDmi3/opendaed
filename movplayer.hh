@@ -75,7 +75,7 @@ public:
 	void Stop();
 
 	bool UpdateFrame(SDL2pp::Renderer& renderer);
-	SDL2pp::Texture& GetTexture();
+	SDL2pp::Texture* GetTexture();
 };
 
 #endif // MOVPLAYER_HH

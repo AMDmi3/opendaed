@@ -223,6 +223,6 @@ bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
 	return true;
 }
 
-SDL2pp::Texture& MovPlayer::GetTexture() {
-	return *texture_.get();
+SDL2pp::Texture* MovPlayer::GetTexture() {
+	return texture_.get();
 }
