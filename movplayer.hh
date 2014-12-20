@@ -42,10 +42,10 @@ protected:
 	};
 
 protected:
+	std::unique_ptr<QuickTime> qt_;
+
 	std::unique_ptr<SDL2pp::Texture> texture_;
 	std::unique_ptr<SDL2pp::AudioDevice> audio_;
-
-	std::unique_ptr<QuickTime> qt_;
 
 	// state of the currently loaded movie clip
 	std::string current_file_;
