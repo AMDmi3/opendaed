@@ -112,6 +112,7 @@ protected:
 	ControlHandlerMap control_handlers_;
 
 protected:
+	void TryActivateControl(Control control);
 	void ProcessControlAction(Control control);
 
 public:

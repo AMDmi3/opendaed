@@ -17,6 +17,7 @@
  * along with opendaed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_events.h>
 
 #include "gameinterface.hh"
@@ -101,6 +102,14 @@ void GameInterface::Render() {
 		renderer_.Copy(patterns_, SDL2pp::Rect(0, selected_pattern_ * 36, 105, 36), SDL2pp::Rect(162, 412, 105, 36));
 }
 
+void GameInterface::TryActivateControl(Control control) {
+	if (currently_activated_control_ != Control::NONE)
+		return;
+
+	currently_activated_control_ = control;
+	control_activation_time_ = SDL_GetTicks();
+}
+
 void GameInterface::ProcessControlAction(Control control) {
 	switch (control) {
 	case Control::COLORS_IR:
@@ -131,12 +140,9 @@ void GameInterface::Update(unsigned int ticks) {
 
 void GameInterface::ProcessEvent(const SDL_Event& event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-		for (auto& control : controls_) {
-			if (control.second.rect.Contains(SDL2pp::Point(event.button.x, event.button.y)) && currently_activated_control_ == Control::NONE) {
-				currently_activated_control_ = control.first;
-				control_activation_time_ = event.button.timestamp;
-			}
-		}
+		for (auto& control : controls_)
+			if (control.second.rect.Contains(SDL2pp::Point(event.button.x, event.button.y)))
+				TryActivateControl(control.first);
 	}
 }
 
