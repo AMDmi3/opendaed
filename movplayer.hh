@@ -26,7 +26,7 @@
 
 #include <SDL2pp/Renderer.hh>
 #include <SDL2pp/Texture.hh>
-#include <SDL2pp/Audio.hh>
+#include <SDL2pp/AudioDevice.hh>
 
 #include "quicktime.hh"
 

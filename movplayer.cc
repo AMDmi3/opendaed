@@ -22,6 +22,8 @@
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_render.h>
 
+#include <SDL2pp/AudioSpec.hh>
+
 #include "logger.hh"
 
 #include "movplayer.hh"
