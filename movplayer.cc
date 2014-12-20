@@ -26,14 +26,13 @@
 
 #include "movplayer.hh"
 
-MovPlayer::MovPlayer() : playing_(false) {
+MovPlayer::MovPlayer() : state_(STOPPED) {
 }
 
 MovPlayer::~MovPlayer() {
 }
 
-void MovPlayer::Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback) {
-	Log("player") << "playing " << filename << " at [" << startframe << ".." << endframe << "]";
+void MovPlayer::UpdateMovieFile(const std::string& filename, bool need_audio) {
 	has_audio_ = false;
 	if (filename != current_file_ || qt_.get() == nullptr) {
 		// open new qt video
@@ -45,7 +44,7 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe, 
 		if (!qt_->SupportedVideo())
 			throw std::runtime_error("video track not supported");
 
-		if (qt_->HasAudio()) {
+		if (need_audio && qt_->HasAudio()) {
 			if (!qt_->SupportedAudio())
 				throw std::runtime_error("audio track not supported");
 			has_audio_ = true;
@@ -54,6 +53,53 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe, 
 		current_frame_ = -1;
 		next_frame_ = 0;
 	}
+}
+
+void MovPlayer::UpdateFrameTexture(SDL2pp::Renderer& renderer, int frame) {
+	// we already have wanted frame loaded, do nothing
+	if (current_frame_ == frame)
+		return;
+
+	// is seek required?
+	if (next_frame_ != frame) {
+		qt_->SetVideoPosition(frame);
+		next_frame_ = frame;
+	}
+
+	int width = qt_->GetWidth();
+	int height = qt_->GetHeight();
+
+	// is texture rebuild required?
+	if (texture_.get() == nullptr ||
+			texture_->GetFormat() != SDL_PIXELFORMAT_RGB24 ||
+			texture_->GetAccess() != SDL_TEXTUREACCESS_STREAMING ||
+			texture_->GetWidth() != width ||
+			texture_->GetHeight() != height)
+		texture_.reset(new SDL2pp::Texture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height));
+
+	// decode next frame
+	{
+		SDL2pp::Texture::LockHandle lock = texture_->Lock(SDL2pp::Rect::Null());
+		qt_->DecodeVideo(static_cast<unsigned char*>(lock.GetPixels()), lock.GetPitch());
+	}
+
+	current_frame_ = next_frame_++;
+}
+
+void MovPlayer::ResetPlayback() {
+	finish_callback_ = Callback();
+	start_frame_ = end_frame_ = 0;
+	start_frame_ticks_ = 0;
+	state_ = STOPPED;
+	audio_.reset(nullptr);
+}
+
+void MovPlayer::Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback) {
+	Log("player") << "playing " << filename << " at [" << startframe << ".." << endframe << "]";
+
+	ResetPlayback();
+
+	UpdateMovieFile(filename, true);
 
 	// print some info
 	Log("player") << "  video:";
@@ -89,7 +135,6 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe, 
 	end_frame_ = endframe - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
 
 	// setup audio
-	audio_.reset(nullptr);
 	if (has_audio_) {
 		SDL2pp::AudioSpec spec(qt_->GetSampleRate(), AUDIO_U8, qt_->GetTrackChannels(), 16);
 		audio_.reset(new SDL2pp::AudioDevice("", false, spec,
@@ -106,17 +151,33 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe, 
 
 	start_frame_ticks_ = SDL_GetTicks();
 
-	playing_ = true;
+	state_ = PLAYING;
+}
+
+void MovPlayer::PlaySingleFrame(const std::string& filename, int frame) {
+	Log("player") << "playing " << filename << " single frame " << frame;
+
+	ResetPlayback();
+
+	UpdateMovieFile(filename, false);
+
+	// print some info
+	Log("player") << "  video:";
+	Log("player") << "    dimensions: " << qt_->GetWidth() << "x" << qt_->GetHeight();
+
+	start_frame_ = frame;
+
+	state_ = SINGLE_FRAME;
 }
 
 void MovPlayer::Stop() {
 	Log("player") << "stopping";
-	playing_ = false;
+	state_ = STOPPED;
 }
 
 bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
-	// not playing -> do nothing
-	if (!playing_)
+	// no movie loaded -> nothing to do
+	if (!qt_.get())
 		return false;
 
 	// ensure audio callback is not called while processing this frame
@@ -125,49 +186,38 @@ bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
 		lock = audio_->Lock();
 
 	// calculate wanted frame from given time
-	int wanted_frame = start_frame_ + (SDL_GetTicks() - start_frame_ticks_) * qt_->GetTimeScale() / (qt_->GetFrameDuration() * 1000) - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
+	int wanted_frame;
+	switch (state_) {
+	case STOPPED:
+		wanted_frame = current_frame_;
+		break;
+	case PLAYING:
+		wanted_frame = start_frame_ +
+			(SDL_GetTicks() - start_frame_ticks_) * qt_->GetTimeScale() / (qt_->GetFrameDuration() * 1000) -
+			qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
+		if (wanted_frame > end_frame_)
+			wanted_frame = end_frame_;
+		break;
+	case SINGLE_FRAME:
+		wanted_frame = start_frame_;
+		break;
+	}
 
 	// don't go past end frame
 	if (wanted_frame < 0)
 		wanted_frame = 0;
-	if (wanted_frame > end_frame_)
-		wanted_frame = end_frame_;
 
-	// we already have wanted frame loaded, do nothing
-	if (current_frame_ == wanted_frame)
-		return true;
+	UpdateFrameTexture(renderer, wanted_frame);
 
-	// seek required
-	if (next_frame_ != wanted_frame) {
-		qt_->SetVideoPosition(wanted_frame);
-		next_frame_ = wanted_frame;
-	}
-
-	int width = qt_->GetWidth();
-	int height = qt_->GetHeight();
-
-	// texture rebuild required
-	if (texture_.get() == nullptr ||
-			texture_->GetFormat() != SDL_PIXELFORMAT_RGB24 ||
-			texture_->GetAccess() != SDL_TEXTUREACCESS_STREAMING ||
-			texture_->GetWidth() != width ||
-			texture_->GetHeight() != height)
-		texture_.reset(new SDL2pp::Texture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height));
-
-	// decode next frame
-	{
-		SDL2pp::Texture::LockHandle lock = texture_->Lock(SDL2pp::Rect::Null());
-		qt_->DecodeVideo(static_cast<unsigned char*>(lock.GetPixels()), lock.GetPitch());
-	}
-
-	current_frame_ = next_frame_++;
-
-	if (current_frame_ >= end_frame_) {
-		Log("player") << "movie finished";
-		if (audio_.get())
-			audio_->Pause(true);
-		finish_callback_();
-		playing_ = false;
+	if (state_ == PLAYING) {
+		if (current_frame_ >= end_frame_) {
+			Log("player") << "movie finished";
+			if (audio_.get())
+				audio_->Pause(true);
+			if (finish_callback_)
+				finish_callback_();
+			state_ = STOPPED;
+		}
 	}
 
 	return true;

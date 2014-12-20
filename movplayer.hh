@@ -35,28 +35,43 @@ public:
 	typedef std::function<void()> Callback;
 
 protected:
+	enum State {
+		PLAYING,
+		STOPPED,
+		SINGLE_FRAME,
+	};
+
+protected:
 	std::unique_ptr<SDL2pp::Texture> texture_;
 	std::unique_ptr<SDL2pp::AudioDevice> audio_;
 
 	std::unique_ptr<QuickTime> qt_;
 
+	// state of the currently loaded movie clip
 	std::string current_file_;
-
-	Callback finish_callback_;
 	bool has_audio_;
-	bool playing_;
-
-	int start_frame_;
-	int end_frame_;
 	int current_frame_;
 	int next_frame_;
+
+	// state of the player
+	State state_;
 	unsigned int start_frame_ticks_;
+	int start_frame_;
+	int end_frame_;
+	Callback finish_callback_;
+
+protected:
+	void UpdateMovieFile(const std::string& name, bool need_audio);
+	void UpdateFrameTexture(SDL2pp::Renderer& renderer, int frame);
+
+	void ResetPlayback();
 
 public:
 	MovPlayer();
 	~MovPlayer();
 
-	void Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback = [](){});
+	void Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback = Callback());
+	void PlaySingleFrame(const std::string& filename, int frame);
 	void Stop();
 
 	bool UpdateFrame(SDL2pp::Renderer& renderer);
