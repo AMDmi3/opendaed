@@ -34,8 +34,6 @@ public:
 	enum class Control {
 		NONE,
 
-		LASER,
-
 		ANALYSIS,
 		DIAGNOSTICS,
 		YES,
@@ -109,6 +107,7 @@ protected:
 
 	ColorsMode colors_mode_;
 	int selected_pattern_;
+	bool laser_enabled_;
 
 	ControlHandlerMap control_handlers_;
 
@@ -126,6 +125,8 @@ public:
 
 	void ResetHandlers();
 	void InstallHandler(Control control, std::function<void()>&& handler);
+
+	void EnableLaser(bool enable);
 };
 
 #endif // GAMEINTERFACE_HH

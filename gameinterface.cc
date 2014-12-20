@@ -24,8 +24,6 @@
 constexpr unsigned int GameInterface::Constants::ControlDelayMs;
 
 const GameInterface::ControlMap GameInterface::controls_ = {
-	{ GameInterface::Control::LASER, { GameInterface::Texture::FNHILITE, { 28, 18, 55, 43 }, { 0, 173, 55, 43 } } },
-
 	{ GameInterface::Control::ANALYSIS, { GameInterface::Texture::FNHILITE, { 10, 101, 90, 18 }, { 0, 0, 90, 18 } } },
 	{ GameInterface::Control::DIAGNOSTICS, { GameInterface::Texture::FNHILITE, { 39, 141, 80, 18 }, { 0, 19, 80, 18 } } },
 	{ GameInterface::Control::YES, { GameInterface::Texture::FNHILITE, { 26, 181, 36, 16 }, { 0, 38, 36, 16 } } },
@@ -63,7 +61,8 @@ GameInterface::GameInterface(SDL2pp::Renderer& renderer, const DataManager& data
 	  patterns_(renderer, datamanager.GetPath("images/patterns.bmp")),
 	  currently_activated_control_(GameInterface::Control::NONE),
 	  colors_mode_(ColorsMode::VIS),
-	  selected_pattern_(-1) {
+	  selected_pattern_(-1),
+	  laser_enabled_(false) {
 }
 
 GameInterface::~GameInterface() {
@@ -92,6 +91,10 @@ void GameInterface::Render() {
 	default:
 		break;
 	}
+
+	// laser indicator
+	if (laser_enabled_)
+		renderer_.Copy(fnhighlights_, SDL2pp::Rect(0, 173, 55, 43), SDL2pp::Rect(28, 18, 55, 43));
 
 	// pattern
 	if (selected_pattern_ >= 0)
@@ -143,4 +146,8 @@ void GameInterface::ResetHandlers() {
 
 void GameInterface::InstallHandler(Control control, std::function<void()>&& handler) {
 	control_handlers_.emplace(control, handler);
+}
+
+void GameInterface::EnableLaser(bool enabled) {
+	laser_enabled_ = enabled;
 }
