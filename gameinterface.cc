@@ -143,6 +143,33 @@ void GameInterface::ProcessEvent(const SDL_Event& event) {
 		for (auto& control : controls_)
 			if (control.second.rect.Contains(SDL2pp::Point(event.button.x, event.button.y)))
 				TryActivateControl(control.first);
+	} else if (event.type == SDL_KEYUP) {
+		if (event.key.keysym.mod == KMOD_NONE) {
+			switch (event.key.keysym.sym) {
+			case SDLK_a: TryActivateControl(Control::ANALYSIS); break;
+			case SDLK_d: TryActivateControl(Control::DIAGNOSTICS); break;
+			case SDLK_y: TryActivateControl(Control::YES); break;
+			case SDLK_n: TryActivateControl(Control::NO); break;
+			case SDLK_t: TryActivateControl(Control::STATUS); break;
+			case SDLK_s: TryActivateControl(Control::STARTUP); break;
+			case SDLK_p: TryActivateControl(Control::DEPLOY); break;
+			case SDLK_g: TryActivateControl(Control::GRAPPLE_ARM); break;
+			case SDLK_f: TryActivateControl(Control::FLOODLIGHT); break;
+			default: break;
+			}
+		} else if (event.key.keysym.mod == KMOD_LCTRL || event.key.keysym.mod == KMOD_RCTRL) {
+			switch (event.key.keysym.sym) {
+			case SDLK_i: // TODO: infrared // XXX: not used in the game, may ignore
+			case SDLK_r: // TODO: red
+			case SDLK_o: // TODO: orange
+			case SDLK_y: // TODO: yellow
+			case SDLK_g: // TODO: green
+			case SDLK_b: // TODO: blue
+			case SDLK_p: // TODO: purple
+			case SDLK_u: // TODO: ultraviolet // XXX: not used in the game, may ignore
+			default: break;
+			}
+		}
 	}
 }
 
