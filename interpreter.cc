@@ -129,9 +129,25 @@ void Interpreter::Update() {
 				awaiting_event_ = true;
 				return;
 			}
+		case 3:
+			{
+				Log("interp") << "  playing a single frame: ";
+				player_.PlaySingleFrame(
+						data_manager_.GetPath(current_entry->GetName()),
+						current_entry->GetStartFrame()
+					);
+				awaiting_event_ = true;
+				return;
+			}
 		case 5:
 			{
 				Log("interp") << "  enable user interface (not implemented yet)";
+				current_node_.second += current_entry->GetDefaultOffset();
+				break;
+			}
+		case 30:
+			{
+				Log("interp") << "  something hotzone-related, skipping";
 				current_node_.second += current_entry->GetDefaultOffset();
 				break;
 			}
