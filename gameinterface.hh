@@ -79,6 +79,13 @@ protected:
 		UV,
 	};
 
+	enum class NavMode {
+		LEFT = 0x1,
+		RIGHT = 0x2,
+		UP = 0x4,
+		DOWN = 0x8,
+	};
+
 	struct ControlInfo {
 		Texture texture;
 		SDL2pp::Rect rect;
@@ -105,9 +112,12 @@ protected:
 	Control currently_activated_control_;
 	unsigned int control_activation_time_;
 
+	bool ui_enabled_;
+	bool fullscreen_video_;
 	ColorsMode colors_mode_;
 	int selected_pattern_;
 	bool laser_enabled_;
+	int navigation_mask_;
 
 	ControlHandlerMap control_handlers_;
 
@@ -127,7 +137,9 @@ public:
 	void ResetHandlers();
 	void InstallHandler(Control control, std::function<void()>&& handler);
 
-	void EnableLaser(bool enable);
+	void EnableLaserMode();
+	void EnableNavigationMode(int navmask);
+	void ResetMode();
 };
 
 #endif // GAMEINTERFACE_HH

@@ -61,9 +61,12 @@ GameInterface::GameInterface(SDL2pp::Renderer& renderer, const DataManager& data
 	  mlhighlights_(renderer, datamanager.GetPath("images/mlhilite.bmp")),
 	  patterns_(renderer, datamanager.GetPath("images/patterns.bmp")),
 	  currently_activated_control_(GameInterface::Control::NONE),
+	  ui_enabled_(true),
+	  fullscreen_video_(false),
 	  colors_mode_(ColorsMode::VIS),
 	  selected_pattern_(-1),
-	  laser_enabled_(false) {
+	  laser_enabled_(false),
+	  navigation_mask_(0) {
 }
 
 GameInterface::~GameInterface() {
@@ -100,6 +103,19 @@ void GameInterface::Render() {
 	// pattern
 	if (selected_pattern_ >= 0)
 		renderer_.Copy(patterns_, SDL2pp::Rect(0, selected_pattern_ * 36, 105, 36), SDL2pp::Rect(162, 412, 105, 36));
+
+	// navigation marks
+	renderer_.SetDrawColor(104, 191, 136);
+	if (navigation_mask_ & (int)NavMode::LEFT) {
+		renderer_.DrawLine(298, 120, 298, 151);
+		renderer_.DrawLine(298, 136, 304, 136);
+	}
+	if (navigation_mask_ & (int)NavMode::RIGHT) {
+		renderer_.DrawLine(611, 120, 611, 151);
+		renderer_.DrawLine(605, 136, 611, 136);
+	}
+	// TODO: top
+	// TODO: bottom
 }
 
 void GameInterface::TryActivateControl(Control control) {
@@ -155,6 +171,7 @@ void GameInterface::ProcessEvent(const SDL_Event& event) {
 			case SDLK_p: TryActivateControl(Control::DEPLOY); break;
 			case SDLK_g: TryActivateControl(Control::GRAPPLE_ARM); break;
 			case SDLK_f: TryActivateControl(Control::FLOODLIGHT); break;
+			case SDLK_SPACE: fullscreen_video_ = !fullscreen_video_; break;
 			default: break;
 			}
 		} else if (event.key.keysym.mod == KMOD_LCTRL || event.key.keysym.mod == KMOD_RCTRL) {
@@ -181,6 +198,15 @@ void GameInterface::InstallHandler(Control control, std::function<void()>&& hand
 	control_handlers_.emplace(control, handler);
 }
 
-void GameInterface::EnableLaser(bool enabled) {
-	laser_enabled_ = enabled;
+void GameInterface::EnableLaserMode() {
+	laser_enabled_ = true;
+}
+
+void GameInterface::EnableNavigationMode(int navigation_mask) {
+	navigation_mask_ = navigation_mask;
+}
+
+void GameInterface::ResetMode() {
+	laser_enabled_ = false;
+	navigation_mask_ = 0;
 }
