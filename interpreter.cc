@@ -111,6 +111,9 @@ void Interpreter::Update() {
 					case (int)NodFile::Condition::ANALYSIS:
 						interface_.InstallHandler(GameInterface::Control::ANALYSIS, [=]() { InterruptAndGoto(condition.second); } );
 						break;
+					case (int)NodFile::Condition::FLOODLIGHT:
+						interface_.InstallHandler(GameInterface::Control::FLOODLIGHT, [=]() { InterruptAndGoto(condition.second); } );
+						break;
 					default:
 						throw std::logic_error("condition type not implemented");
 					}
@@ -131,6 +134,36 @@ void Interpreter::Update() {
 			}
 		case 3:
 			{
+				interface_.ResetHandlers();
+				for (auto& condition : current_entry->GetConditions()) {
+					Log("interp") << "  installing interface control handler: condition=" << condition.first;
+					switch (condition.first) {
+					case (int)NodFile::Condition::YES:
+						interface_.InstallHandler(GameInterface::Control::YES, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::NO:
+						interface_.InstallHandler(GameInterface::Control::NO, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::STARTUP:
+						interface_.InstallHandler(GameInterface::Control::STARTUP, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::DIAGNOSTICS:
+						interface_.InstallHandler(GameInterface::Control::DIAGNOSTICS, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::DEPLOY:
+						interface_.InstallHandler(GameInterface::Control::DEPLOY, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::ANALYSIS:
+						interface_.InstallHandler(GameInterface::Control::ANALYSIS, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					case (int)NodFile::Condition::FLOODLIGHT:
+						interface_.InstallHandler(GameInterface::Control::FLOODLIGHT, [=]() { InterruptAndGoto(condition.second); } );
+						break;
+					default:
+						throw std::logic_error("condition type not implemented");
+					}
+				}
+
 				Log("interp") << "  playing a single frame: ";
 				player_.PlaySingleFrame(
 						data_manager_.GetPath(current_entry->GetName()),
