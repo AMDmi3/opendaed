@@ -27,12 +27,13 @@ HotFile::HotFile(const std::string& path) {
 	stream.exceptions(std::ifstream::badbit);
 
 	while (!stream.eof()) {
-		Entry e;
-		stream >> e.frameno;
+		int frameno;
+		stream >> frameno;
 
 		if (stream.fail())
 			break;
 
+		RectVector rects;
 		for (int i = 0; i < 8; i++) {
 			int x1, y1, x2, y2;
 
@@ -41,23 +42,20 @@ HotFile::HotFile(const std::string& path) {
 			if (stream.fail())
 				break;
 
-			if (x1 != 0 || y1 != 0 || x2 != 0 && y2 != 0)
-				e.rects.emplace_back(x1, y1, x2 - x1, y2 - y1);
+			if (x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0)
+				rects.emplace_back(x1, y1, x2 - x1, y2 - y1);
 		}
 
-		entries_.push_back(std::move(e));
+		entries_.emplace(std::make_pair(frameno, std::move(rects)));
 	}
 }
 
 HotFile::~HotFile() {
 }
 
-const HotFile::Entry& HotFile::GetEntry(int index) const {
-	if (index < 0 || index >= (int)entries_.size())
-		throw std::runtime_error("entry does not exists in hot file");
-	return entries_[index];
-}
-
-int HotFile::GetNumEntries() const {
-	return entries_.size();
+const HotFile::RectVector& HotFile::GetRectsForFrame(int frame) const {
+	EntryMap::const_iterator entry = entries_.find(frame);
+	if (entry == entries_.end())
+		throw std::runtime_error("no hotspots for requested frame");
+	return entry->second;
 }

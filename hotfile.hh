@@ -22,34 +22,25 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <SDL2pp/Rect.hh>
 
 class HotFile {
 public:
-	struct Entry {
-		int frameno;
-		std::vector<SDL2pp::Rect> rects;
-	};
+	typedef std::vector<SDL2pp::Rect> RectVector;
 
 protected:
-	typedef std::vector<Entry> EntryVector;
+	typedef std::map<int, RectVector> EntryMap;
 
 protected:
-	EntryVector entries_;
+	EntryMap entries_;
 
 public:
 	HotFile(const std::string& path);
 	~HotFile();
 
-	const Entry& GetEntry(int index) const;
-	int GetNumEntries() const;
-
-	template<class F>
-	void ForEach(const F& processor) const {
-		for (auto& e : entries_)
-			processor(e);
-	}
+	const RectVector& GetRectsForFrame(int frame) const;
 };
 
 #endif // HOTFILE_HH
