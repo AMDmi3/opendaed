@@ -59,6 +59,10 @@ public:
 					conds[fields[i+1]] = fields[i];
 			return conds;
 		}
+
+		std::pair<int, int> GetCondition(int n) const {
+			return std::make_pair(fields[6 + n * 2 + 7], fields[6 + n * 2]);
+		}
 	};
 
 protected:
