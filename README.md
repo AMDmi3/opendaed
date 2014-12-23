@@ -8,7 +8,7 @@ Encounter" interactive movie puzzle adventure game.
 The project is currently on the early stages of development, and
 is not yet playable, however you can already run through the very
 first scenes of the story (from beginning up to entering Vekkar
-freighter). Sound is not supported yet.
+freighter).
 
 ## Building
 
