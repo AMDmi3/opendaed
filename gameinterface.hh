@@ -170,6 +170,8 @@ public:
 	~GameInterface();
 
 	void ProcessEvent(const SDL_Event& event);
+	void ProcessMouseDown(const SDL_MouseButtonEvent& button);
+	void ProcessKeyUp(const SDL_KeyboardEvent& key);
 	void Update(unsigned int ticks);
 	void Render(SDL2pp::Texture* video);
 
