@@ -28,6 +28,24 @@
 
 #include "interpreter.hh"
 
+namespace {
+
+static GameInterface::ControlEvent ConditionToEvent(int cond) {
+	switch (cond) {
+	case (int)NodFile::Condition::YES: return GameInterface::ControlEvent::YES;
+	case (int)NodFile::Condition::NO: return GameInterface::ControlEvent::NO;
+	case (int)NodFile::Condition::STARTUP: return GameInterface::ControlEvent::STARTUP;
+	case (int)NodFile::Condition::DIAGNOSTICS: return GameInterface::ControlEvent::DIAGNOSTICS;
+	case (int)NodFile::Condition::DEPLOY: return GameInterface::ControlEvent::DEPLOY;
+	case (int)NodFile::Condition::ANALYSIS: return GameInterface::ControlEvent::ANALYSIS;
+	case (int)NodFile::Condition::FLOODLIGHT: return GameInterface::ControlEvent::FLOODLIGHT;
+	default:
+		throw std::logic_error("condition type not implemented");
+	}
+}
+
+}
+
 Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interface, MovPlayer& player, const std::string& startnod, int startentry) : data_manager_(data_manager), interface_(interface), player_(player), awaiting_event_(false) {
 	std::list<std::string> loading_queue;
 	loading_queue.push_back(startnod);
@@ -49,16 +67,23 @@ Interpreter::Interpreter(const DataManager& data_manager, GameInterface& interfa
 	}
 
 	current_node_ = std::make_pair(startnod, startentry);
+
+	interface_.SetListener(this);
+	player_.SetListener(this);
 }
 
 Interpreter::~Interpreter() {
+	interface_.SetListener(nullptr);
+	player_.SetListener(nullptr);
 }
 
 void Interpreter::InterruptAndGoto(int offset) {
+	if (!awaiting_event_)
+		return;
+
 	Log("interp") << "interrupt received";
 
 	player_.Stop();
-	interface_.ResetHandlers();
 
 	current_node_.second += offset;
 	awaiting_event_ = false;
@@ -69,6 +94,8 @@ void Interpreter::Update() {
 		return;
 
 	while (1) {
+		ResetHandlers();
+
 		NodFileMap::const_iterator nodfile = nod_files_.find(current_node_.first);
 		if (nodfile == nod_files_.end())
 			throw std::logic_error("nod file not found"); // shouldn't happend as all files are preloaded in constructor
@@ -89,79 +116,36 @@ void Interpreter::Update() {
 		case 2: // simple "play movie" command
 		case 61: // play movie with analysis as result?
 			{
-				interface_.ResetHandlers();
 				for (auto& condition : current_entry->GetConditions()) {
 					Log("interp") << "  installing interface control handler: condition=" << condition.first;
-					switch (condition.first) {
-					case (int)NodFile::Condition::YES:
-						interface_.InstallHandler(GameInterface::Control::YES, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::NO:
-						interface_.InstallHandler(GameInterface::Control::NO, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::STARTUP:
-						interface_.InstallHandler(GameInterface::Control::STARTUP, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::DIAGNOSTICS:
-						interface_.InstallHandler(GameInterface::Control::DIAGNOSTICS, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::DEPLOY:
-						interface_.InstallHandler(GameInterface::Control::DEPLOY, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::ANALYSIS:
-						interface_.InstallHandler(GameInterface::Control::ANALYSIS, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::FLOODLIGHT:
-						interface_.InstallHandler(GameInterface::Control::FLOODLIGHT, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					default:
-						throw std::logic_error("condition type not implemented");
-					}
+					AddControlEventHandler([=](GameInterface::ControlEvent event){
+							if (event == ConditionToEvent(condition.first))
+								InterruptAndGoto(condition.second);
+						});
 				}
 
-				Log("interp") << "  playing a movie";
 				int offset = current_entry->GetDefaultOffset();
+				AddEndOfClipEventHandler([=](){
+						InterruptAndGoto(offset);
+					});
+
+				Log("interp") << "  playing a movie";
 				player_.Play(
 						data_manager_.GetPath(current_entry->GetName()),
 						current_entry->GetStartFrame(),
-						current_entry->GetEndFrame(),
-						[=]() {
-							InterruptAndGoto(offset);
-						}
+						current_entry->GetEndFrame()
 					);
 				awaiting_event_ = true;
 				return;
 			}
 		case 3:
 			{
-				interface_.ResetHandlers();
 				for (auto& condition : current_entry->GetConditions()) {
 					Log("interp") << "  installing interface control handler: condition=" << condition.first;
-					switch (condition.first) {
-					case (int)NodFile::Condition::YES:
-						interface_.InstallHandler(GameInterface::Control::YES, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::NO:
-						interface_.InstallHandler(GameInterface::Control::NO, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::STARTUP:
-						interface_.InstallHandler(GameInterface::Control::STARTUP, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::DIAGNOSTICS:
-						interface_.InstallHandler(GameInterface::Control::DIAGNOSTICS, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::DEPLOY:
-						interface_.InstallHandler(GameInterface::Control::DEPLOY, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::ANALYSIS:
-						interface_.InstallHandler(GameInterface::Control::ANALYSIS, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					case (int)NodFile::Condition::FLOODLIGHT:
-						interface_.InstallHandler(GameInterface::Control::FLOODLIGHT, [=]() { InterruptAndGoto(condition.second); } );
-						break;
-					default:
-						throw std::logic_error("condition type not implemented");
-					}
+					AddControlEventHandler([=](GameInterface::ControlEvent event){
+							if (event == ConditionToEvent(condition.first))
+								InterruptAndGoto(condition.second);
+						});
 				}
 
 				Log("interp") << "  playing a single frame: ";

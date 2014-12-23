@@ -31,6 +31,43 @@
 
 class GameInterface {
 public:
+	enum class ControlEvent {
+		ANALYSIS,
+		DIAGNOSTICS,
+		YES,
+		NO,
+		STATUS,
+
+		STARTUP,
+		DEPLOY,
+		GRAPPLE_ARM,
+		FLOODLIGHT,
+
+		INFRARED,
+
+		RED,
+		ORANGE,
+		YELLOW,
+		GREEN,
+		BLUE,
+		PURPLE,
+
+		ULTRAVIOLET,
+	};
+
+	class EventListener {
+	public:
+		virtual ~EventListener() {
+		}
+
+		virtual void ProcessControlEvent(ControlEvent) {
+		}
+
+		virtual void ProcessPointEvent(const SDL2pp::Point&) {
+		}
+	};
+
+protected:
 	enum class Control {
 		NONE,
 
@@ -119,23 +156,24 @@ protected:
 	bool laser_enabled_;
 	int navigation_mask_;
 
-	ControlHandlerMap control_handlers_;
+	EventListener* listener_;
 
 protected:
 	void TryActivateControl(Control control);
 	void ProcessControlAction(Control control);
 
+	void EmitControlEvent(ControlEvent event);
+	void EmitPointEvent(const SDL2pp::Point& point);
+
 public:
 	GameInterface(SDL2pp::Renderer& renderer, const DataManager& datamanager);
 	~GameInterface();
 
+	void ProcessEvent(const SDL_Event& event);
+	void Update(unsigned int ticks);
 	void Render(SDL2pp::Texture* video);
 
-	void Update(unsigned int ticks);
-	void ProcessEvent(const SDL_Event& event);
-
-	void ResetHandlers();
-	void InstallHandler(Control control, std::function<void()>&& handler);
+	void SetListener(EventListener* listener);
 
 	void EnableLaserMode();
 	void EnableNavigationMode(int navmask);

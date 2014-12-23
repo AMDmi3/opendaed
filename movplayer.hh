@@ -32,7 +32,14 @@
 
 class MovPlayer {
 public:
-	typedef std::function<void()> Callback;
+	class EventListener {
+	public:
+		virtual ~EventListener() {
+		}
+
+		virtual void ProcessEndOfClipEvent() {
+		}
+	};
 
 protected:
 	enum State {
@@ -58,7 +65,8 @@ protected:
 	unsigned int start_frame_ticks_;
 	int start_frame_;
 	int end_frame_;
-	Callback finish_callback_;
+
+	EventListener* listener_;
 
 protected:
 	void UpdateMovieFile(const std::string& name, bool need_audio);
@@ -66,11 +74,15 @@ protected:
 
 	void ResetPlayback();
 
+	void EmitEndOfClipEvent();
+
 public:
 	MovPlayer();
 	~MovPlayer();
 
-	void Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback = Callback());
+	void SetListener(EventListener* listener);
+
+	void Play(const std::string& filename, int startframe, int endframe);
 	void PlaySingleFrame(const std::string& filename, int frame);
 	void Stop();
 

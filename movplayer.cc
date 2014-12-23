@@ -28,10 +28,14 @@
 
 #include "movplayer.hh"
 
-MovPlayer::MovPlayer() : state_(STOPPED) {
+MovPlayer::MovPlayer() : state_(STOPPED), listener_(nullptr) {
 }
 
 MovPlayer::~MovPlayer() {
+}
+
+void MovPlayer::SetListener(MovPlayer::EventListener* listener) {
+	listener_ = listener;
 }
 
 void MovPlayer::UpdateMovieFile(const std::string& filename, bool need_audio) {
@@ -89,14 +93,18 @@ void MovPlayer::UpdateFrameTexture(SDL2pp::Renderer& renderer, int frame) {
 }
 
 void MovPlayer::ResetPlayback() {
-	finish_callback_ = Callback();
 	start_frame_ = end_frame_ = 0;
 	start_frame_ticks_ = 0;
 	state_ = STOPPED;
 	audio_.reset(nullptr);
 }
 
-void MovPlayer::Play(const std::string& filename, int startframe, int endframe, Callback&& finish_callback) {
+void MovPlayer::EmitEndOfClipEvent() {
+	if (listener_)
+		listener_->ProcessEndOfClipEvent();
+}
+
+void MovPlayer::Play(const std::string& filename, int startframe, int endframe) {
 	Log("player") << "playing " << filename << " at [" << startframe << ".." << endframe << "]";
 
 	ResetPlayback();
@@ -129,8 +137,6 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe, 
 		Log("player") << "    channels: " << qt_->GetTrackChannels();
 		Log("player") << "    pts offset: " << qt_->GetAudioPtsOffset() << " samples";
 	}
-
-	finish_callback_ = finish_callback;
 
 	// setup video timing
 	start_frame_ = startframe - qt_->GetVideoPtsOffset() / qt_->GetFrameDuration();
@@ -216,9 +222,8 @@ bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
 			Log("player") << "movie finished";
 			if (audio_.get())
 				audio_->Pause(true);
-			if (finish_callback_)
-				finish_callback_();
 			state_ = STOPPED;
+			EmitEndOfClipEvent();
 		}
 	}
 

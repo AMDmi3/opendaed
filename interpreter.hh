@@ -23,12 +23,13 @@
 #include <map>
 
 #include "nodfile.hh"
+#include "gameeventlistener.hh"
 
 class DataManager;
 class GameInterface;
 class MovPlayer;
 
-class Interpreter {
+class Interpreter : private GameEventListener {
 protected:
 	typedef std::map<std::string, NodFile> NodFileMap;
 	typedef std::pair<std::string, int> NodPointer;
@@ -49,7 +50,7 @@ protected:
 
 public:
 	Interpreter(const DataManager& data_manager, GameInterface& interface, MovPlayer& player, const std::string& startnod, int numentry = 0);
-	~Interpreter();
+	virtual ~Interpreter();
 
 	void Update();
 };

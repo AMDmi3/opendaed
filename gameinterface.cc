@@ -66,7 +66,8 @@ GameInterface::GameInterface(SDL2pp::Renderer& renderer, const DataManager& data
 	  colors_mode_(ColorsMode::VIS),
 	  selected_pattern_(-1),
 	  laser_enabled_(false),
-	  navigation_mask_(0) {
+	  navigation_mask_(0),
+	  listener_(nullptr) {
 }
 
 GameInterface::~GameInterface() {
@@ -145,6 +146,19 @@ void GameInterface::TryActivateControl(Control control) {
 
 void GameInterface::ProcessControlAction(Control control) {
 	switch (control) {
+	// Left button mapping
+	case Control::ANALYSIS: EmitControlEvent(ControlEvent::ANALYSIS); break;
+	case Control::DIAGNOSTICS: EmitControlEvent(ControlEvent::DIAGNOSTICS); break;
+	case Control::YES: EmitControlEvent(ControlEvent::YES); break;
+	case Control::NO: EmitControlEvent(ControlEvent::NO); break;
+	case Control::STATUS: EmitControlEvent(ControlEvent::STATUS); break;
+
+	case Control::STARTUP: EmitControlEvent(ControlEvent::STARTUP); break;
+	case Control::DEPLOY: EmitControlEvent(ControlEvent::DEPLOY); break;
+	case Control::GRAPPLE_ARM: EmitControlEvent(ControlEvent::GRAPPLE_ARM); break;
+	case Control::FLOODLIGHT: EmitControlEvent(ControlEvent::FLOODLIGHT); break;
+
+	// Color mode selection
 	case Control::COLORS_IR:
 		colors_mode_ = ColorsMode::IR;
 		break;
@@ -154,14 +168,36 @@ void GameInterface::ProcessControlAction(Control control) {
 	case Control::COLORS_UV:
 		colors_mode_ = ColorsMode::UV;
 		break;
-	default:
-		{
-			ControlHandlerMap::iterator handled_control = control_handlers_.find(control);
-			if (handled_control != control_handlers_.end())
-				handled_control->second();
+
+	// Color buttons processing
+	case Control::COLORS_1: case Control::COLORS_2: case Control::COLORS_3:
+	case Control::COLORS_4: case Control::COLORS_5: case Control::COLORS_6:
+		if (colors_mode_ == ColorsMode::IR) {
+			EmitControlEvent(ControlEvent::INFRARED);
+		} else if (colors_mode_ == ColorsMode::UV) {
+			EmitControlEvent(ControlEvent::ULTRAVIOLET);
+		} else switch (control) {
+			case Control::COLORS_1: EmitControlEvent(ControlEvent::RED); break;
+			case Control::COLORS_2: EmitControlEvent(ControlEvent::ORANGE); break;
+			case Control::COLORS_3: EmitControlEvent(ControlEvent::YELLOW); break;
+			case Control::COLORS_4: EmitControlEvent(ControlEvent::GREEN); break;
+			case Control::COLORS_5: EmitControlEvent(ControlEvent::BLUE); break;
+			case Control::COLORS_6: EmitControlEvent(ControlEvent::PURPLE); break;
+			default: break;
 		}
 		break;
+	default: break;
 	}
+}
+
+void GameInterface::EmitControlEvent(GameInterface::ControlEvent event) {
+	if (listener_)
+		listener_->ProcessControlEvent(event);
+}
+
+void GameInterface::EmitPointEvent(const SDL2pp::Point& point) {
+	if (listener_)
+		listener_->ProcessPointEvent(point);
 }
 
 void GameInterface::Update(unsigned int ticks) {
@@ -210,12 +246,8 @@ void GameInterface::ProcessEvent(const SDL_Event& event) {
 	}
 }
 
-void GameInterface::ResetHandlers() {
-	control_handlers_.clear();
-}
-
-void GameInterface::InstallHandler(Control control, std::function<void()>&& handler) {
-	control_handlers_.emplace(control, handler);
+void GameInterface::SetListener(GameInterface::EventListener* listener) {
+	listener_ = listener;
 }
 
 void GameInterface::EnableLaserMode() {
