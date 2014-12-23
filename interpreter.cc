@@ -116,10 +116,15 @@ void Interpreter::Update() {
 		case 2: // simple "play movie" command
 		case 61: // play movie with analysis as result?
 			{
+				int actionstartframe = current_entry->GetActionStartFrame();
+				int actionendframe = current_entry->GetActionEndFrame();
+
 				for (auto& condition : current_entry->GetConditions()) {
 					Log("interp") << "  installing interface control handler: condition=" << condition.first;
 					AddControlEventHandler([=](GameInterface::ControlEvent event){
-							if (event == ConditionToEvent(condition.first))
+							if (event == ConditionToEvent(condition.first) &&
+									player_.GetCurrentFrame() >= actionstartframe &&
+									player_.GetCurrentFrame() <= actionendframe)
 								InterruptAndGoto(condition.second);
 						});
 				}

@@ -86,6 +86,8 @@ public:
 	void PlaySingleFrame(const std::string& filename, int frame);
 	void Stop();
 
+	int GetCurrentFrame() const;
+
 	bool UpdateFrame(SDL2pp::Renderer& renderer);
 	SDL2pp::Texture* GetTexture();
 };

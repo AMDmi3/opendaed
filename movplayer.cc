@@ -230,6 +230,10 @@ bool MovPlayer::UpdateFrame(SDL2pp::Renderer& renderer) {
 	return true;
 }
 
+int MovPlayer::GetCurrentFrame() const {
+	return current_frame_;
+}
+
 SDL2pp::Texture* MovPlayer::GetTexture() {
 	return texture_.get();
 }

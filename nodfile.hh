@@ -46,6 +46,8 @@ public:
 		int GetType() const { return fields[0]; }
 		int GetStartFrame() const { return fields[1]; }
 		int GetEndFrame() const { return fields[2]; }
+		int GetActionStartFrame() const { return fields[3]; }
+		int GetActionEndFrame() const { return fields[4]; }
 		const std::string GetName() const { return name; }
 
 		int GetDefaultOffset() const { return fields[5]; }
