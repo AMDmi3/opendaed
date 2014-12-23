@@ -40,6 +40,7 @@ public:
 
 	void ScanDir(const std::string& datapath);
 	std::string GetPath(const std::string& path) const;
+	bool HasPath(const std::string& path) const;
 };
 
 #endif // DATAMANAGER_HH

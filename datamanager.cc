@@ -92,3 +92,16 @@ std::string DataManager::GetPath(const std::string& path) const {
 	Log("datamgr") << "returning " << file->second << " for " << path;
 	return file->second;
 }
+
+bool DataManager::HasPath(const std::string& path) const {
+	// Though full path may be provided (e.g. "images/intrface.bmp",
+	// only file name matters, see assumption described in ScanDir()
+	std::string name = path;
+	size_t slashpos = name.rfind('/');
+	if (slashpos != std::string::npos)
+		name = name.substr(slashpos + 1);
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+	PathMap::const_iterator file = data_files_.find(name);
+	return file != data_files_.end();
+}
