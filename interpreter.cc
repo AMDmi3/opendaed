@@ -25,6 +25,7 @@
 #include "datamanager.hh"
 #include "movplayer.hh"
 #include "gameinterface.hh"
+#include "hotfile.hh"
 
 #include "interpreter.hh"
 
@@ -95,6 +96,7 @@ void Interpreter::Update() {
 
 	while (1) {
 		ResetHandlers();
+		interface_.ResetMode();
 
 		NodFileMap::const_iterator nodfile = nod_files_.find(current_node_.first);
 		if (nodfile == nod_files_.end())
@@ -116,9 +118,13 @@ void Interpreter::Update() {
 		case 2: // simple "play movie" command
 		case 61: // play movie with analysis as result?
 			{
+				// save frame limits on player actions
+				// e.g. int a 20 second movie, the game will accept player
+				// input only between 10 and 18 seconds
 				int actionstartframe = current_entry->GetActionStartFrame();
 				int actionendframe = current_entry->GetActionEndFrame();
 
+				// install event handlers for this scene
 				for (auto& condition : current_entry->GetConditions()) {
 					Log("interp") << "  installing interface control handler: condition=" << condition.first;
 					AddControlEventHandler([=](GameInterface::ControlEvent event){
@@ -129,22 +135,27 @@ void Interpreter::Update() {
 						});
 				}
 
+				// install end of clip handler for this scene
 				int offset = current_entry->GetDefaultOffset();
 				AddEndOfClipEventHandler([=](){
 						InterruptAndGoto(offset);
 					});
 
+				// play movie
 				Log("interp") << "  playing a movie";
 				player_.Play(
 						data_manager_.GetPath(current_entry->GetName()),
 						current_entry->GetStartFrame(),
 						current_entry->GetEndFrame()
 					);
+
+				// yield
 				awaiting_event_ = true;
 				return;
 			}
 		case 3:
 			{
+				// install event handlers for this scene
 				for (auto& condition : current_entry->GetConditions()) {
 					Log("interp") << "  installing interface control handler: condition=" << condition.first;
 					AddControlEventHandler([=](GameInterface::ControlEvent event){
@@ -153,11 +164,40 @@ void Interpreter::Update() {
 						});
 				}
 
+				// check if we have a hot zone (is this correct?)
+				std::string hotname = current_entry->GetName();
+				hotname.replace(hotname.length() - 3, std::string::npos, "hot");
+				if (data_manager_.HasPath(hotname)) {
+					Log("interp") << "  found hotzone " << hotname;
+					HotFile hot(data_manager_.GetPath(hotname));
+
+					std::vector<int> offsets_for_rect;
+
+					for (int i = 0; i < 8; i++)
+						offsets_for_rect.push_back(current_entry->GetCondition(i).second);
+
+					AddPointEventHandler([=](const SDL2pp::Point& point) {
+							int nrect = 0;
+							for (auto& rect: hot.GetRectsForFrame(player_.GetCurrentFrame())) {
+								if (rect.Contains(point)) {
+									InterruptAndGoto(offsets_for_rect[nrect]);
+									return;
+								}
+								nrect++;
+							}
+						});
+
+					interface_.EnableLaserMode();
+				}
+
+				// play our single frame
 				Log("interp") << "  playing a single frame: ";
 				player_.PlaySingleFrame(
 						data_manager_.GetPath(current_entry->GetName()),
 						current_entry->GetStartFrame()
 					);
+
+				// yield
 				awaiting_event_ = true;
 				return;
 			}
@@ -170,6 +210,12 @@ void Interpreter::Update() {
 		case 30:
 			{
 				Log("interp") << "  something hotzone-related, skipping";
+				current_node_.second += current_entry->GetDefaultOffset();
+				break;
+			}
+		case 33:
+			{
+				Log("interp") << "  unknown, skipping";
 				current_node_.second += current_entry->GetDefaultOffset();
 				break;
 			}
