@@ -77,17 +77,17 @@ void GameInterface::Render(SDL2pp::Texture* video) {
 	if (fullscreen_video_) {
 		// fullscreen video is enabled, we only need to render it
 		if (video)
-			renderer_.Copy(*video, SDL2pp::Rect::Null(), SDL2pp::Rect(0, 0, 640, 480));
+			renderer_.Copy(*video, SDL2pp::NullOpt, SDL2pp::Rect(0, 0, 640, 480));
 		return;
 	} else if (!ui_enabled_) {
 		// fullscreen video is not enabled, but there's no UI (start
 		// of the game): only render video in the center
 		if (video)
-			renderer_.Copy(*video, SDL2pp::Rect::Null(), SDL2pp::Rect(160, 120, 320, 240));
+			renderer_.Copy(*video, SDL2pp::NullOpt, SDL2pp::Rect(160, 120, 320, 240));
 		return;
 	}
 
-	renderer_.Copy(background_, SDL2pp::Rect::Null(), SDL2pp::Rect(0, 0, 640, 480));
+	renderer_.Copy(background_, SDL2pp::NullOpt, SDL2pp::Rect(0, 0, 640, 480));
 
 	// render currently active control
 	ControlMap::const_iterator active_control_info = controls_.find(currently_activated_control_);
@@ -120,7 +120,7 @@ void GameInterface::Render(SDL2pp::Texture* video) {
 
 	// video
 	if (video)
-		renderer_.Copy(*video, SDL2pp::Rect::Null(), SDL2pp::Rect(295, 16, 320, 240));
+		renderer_.Copy(*video, SDL2pp::NullOpt, SDL2pp::Rect(295, 16, 320, 240));
 
 	// navigation marks
 	renderer_.SetDrawColor(104, 191, 136);

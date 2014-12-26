@@ -62,10 +62,8 @@ public:
 	}
 
 	virtual void ProcessControlEvent(GameInterface::ControlEvent event) override {
-		for (auto i = control_event_handlers_.begin(); i != control_event_handlers_.end(); i++) {
-			std::cerr << "X\n";
+		for (auto i = control_event_handlers_.begin(); i != control_event_handlers_.end(); i++)
 			(*i)(event);
-		}
 	}
 
 	virtual void ProcessPointEvent(const SDL2pp::Point& point) override {

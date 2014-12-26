@@ -85,7 +85,7 @@ void MovPlayer::UpdateFrameTexture(SDL2pp::Renderer& renderer, int frame) {
 
 	// decode next frame
 	{
-		SDL2pp::Texture::LockHandle lock = texture_->Lock(SDL2pp::Rect::Null());
+		SDL2pp::Texture::LockHandle lock = texture_->Lock(SDL2pp::NullOpt);
 		qt_->DecodeVideo(static_cast<unsigned char*>(lock.GetPixels()), lock.GetPitch());
 	}
 
@@ -145,7 +145,7 @@ void MovPlayer::Play(const std::string& filename, int startframe, int endframe) 
 	// setup audio
 	if (has_audio_) {
 		SDL2pp::AudioSpec spec(qt_->GetSampleRate(), AUDIO_U8, qt_->GetTrackChannels(), 16);
-		audio_.reset(new SDL2pp::AudioDevice("", false, spec,
+		audio_.reset(new SDL2pp::AudioDevice(SDL2pp::NullOpt, false, spec,
 				[this](Uint8* stream, int len) {
 					qt_->DecodeAudioRaw(stream, len / qt_->GetTrackChannels());
 				}
