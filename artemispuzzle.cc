@@ -231,10 +231,13 @@ bool ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 		int npiece = row * NUM_COLUMNS + column;
 
 		// rotate piece
-		if (event.button.button == SDL_BUTTON_LEFT)
-			pieces_[npiece] = RotatePiece(pieces_[npiece], true);
-		if (event.button.button == SDL_BUTTON_RIGHT)
-			pieces_[npiece] = RotatePiece(pieces_[npiece], false);
+#ifdef BUG2BUG
+		bool clockwise = true;
+#else
+		bool clockwise = event.button.button != SDL_BUTTON_RIGHT;
+#endif
+		if (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT || event.button.button == SDL_BUTTON_MIDDLE)
+			pieces_[npiece] = RotatePiece(pieces_[npiece], clockwise);
 
 		RecalculateActivePieces();
 	}
