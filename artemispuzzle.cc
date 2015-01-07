@@ -33,16 +33,18 @@ const std::array<ArtemisPuzzle::PieceType, 62> ArtemisPuzzle::initial_pieces_ = 
 	DR, HO, DR, UR, UL, UL, HO, DR, UR,
 } };
 
+// this is bug2bug compatibility, but actually alignment may be
+// improved; look at connection lines between pieces
 const std::array<int, 9> ArtemisPuzzle::col_offsets_ = { {
-	45 + 64 * 0,
-	45 + 64 * 1,
-	45 + 64 * 2,
-	45 + 64 * 3,
-	45 + 64 * 4,
-	45 + 64 * 5,
-	45 + 64 * 6,
-	45 + 64 * 7,
-	45 + 64 * 8,
+	44 + 64 * 0,
+	44 + 64 * 1,
+	44 + 64 * 2,
+	44 + 64 * 3,
+	44 + 64 * 4,
+	44 + 64 * 5,
+	44 + 64 * 6,
+	44 + 64 * 7,
+	44 + 64 * 8,
 } };
 
 const std::array<int, 7> ArtemisPuzzle::row_offsets_ = { {
@@ -50,8 +52,8 @@ const std::array<int, 7> ArtemisPuzzle::row_offsets_ = { {
 	36 + 61 * 1,
 	36 + 61 * 2 + 1,
 	36 + 61 * 3 + 1,
-	36 + 61 * 4 + 2,
-	36 + 61 * 5 + 2,
+	36 + 61 * 4 + 1,
+	36 + 61 * 5 + 1,
 	36 + 61 * 6 + 2,
 } };
 
@@ -68,6 +70,8 @@ ArtemisPuzzle::PieceType ArtemisPuzzle::RotatePiece(PieceType type, bool clockwi
 
 void ArtemisPuzzle::RecalculateActivePieces() {
 	std::fill(active_.begin(), active_.end(), false);
+	std::fill(horizontal_lines_.begin(), horizontal_lines_.end(), false);
+	std::fill(vertical_lines_.begin(), vertical_lines_.end(), false);
 	activated_systems_ = 0;
 
 	PropagateActivity(4, 3, LEFT);
@@ -100,6 +104,8 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 			return; // back into center
 
 		PieceType type = pieces_[PieceNum(x, y)];
+
+		Direction prev_dir = dir;
 
 		switch (dir) {
 		case LEFT:
@@ -140,7 +146,16 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 			break;
 		}
 
+		// activate piece
 		active_[PieceNum(x, y)] = true;
+
+		// activate line from prev piece
+		switch (prev_dir) {
+		case LEFT:  horizontal_lines_[y * 8 + x] = true; break;
+		case RIGHT: horizontal_lines_[y * 8 + x - 1] = true; break;
+		case UP:    vertical_lines_[y * 9 + x] = true; break;
+		case DOWN:  vertical_lines_[(y - 1) * 9 + x] = true; break;
+		}
 	}
 }
 
@@ -164,6 +179,8 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 	  background_(renderer, datamanager.GetPath("images/party/backgrnd.rle")),
 	  pieces_inactive_(renderer, datamanager.GetPath("images/party/ctrw.rle")),
 	  pieces_active_(renderer, datamanager.GetPath("images/party/ctrr.rle")),
+	  line_horiz_(renderer, datamanager.GetPath("images/party/horz.rle")),
+	  line_vert_(renderer, datamanager.GetPath("images/party/vert.bmp")),
 	  pieces_(initial_pieces_) {
 	RecalculateActivePieces();
 }
@@ -215,13 +232,47 @@ void ArtemisPuzzle::Render() {
 			if (x == 4 && y == 3) // skip central piece
 				continue;
 
+			// this is also bug2bug compatible; the thing is that ctrr.bmp
+			// has vertical and horizontal lines misplaced a bit
 			renderer_.Copy(
 					active_[n] ? pieces_active_ : pieces_inactive_,
-					SDL2pp::Rect(0 + 32 * (int)pieces_[n], 0, 32, 32),
+					SDL2pp::Rect(32 * (int)pieces_[n], 0, 32, 32),
 					SDL2pp::Rect(col_offsets_[x], row_offsets_[y], 32, 32)
 				);
 
 			n++;
+		}
+	}
+
+	// Vertical lines
+	n = 0;
+	for (int y = 0; y < 6; y++) {
+		for (int x = 0; x < 9; x++, n++) {
+			if (x == 4 && (y == 2 || y == 3)) // line to core
+				continue;
+			if (vertical_lines_[n]) {
+				renderer_.Copy(
+						line_vert_,
+						SDL2pp::Rect(6, 0, 6, row_offsets_[y + 1] - row_offsets_[y] - 32),
+						SDL2pp::Rect(col_offsets_[x] + 13, row_offsets_[y] + 32, 6, row_offsets_[y + 1] - row_offsets_[y] - 32)
+					);
+			}
+		}
+	}
+
+	// Horizontal lines
+	n = 0;
+	for (int y = 0; y < 7; y++) {
+		for (int x = 0; x < 8; x++, n++) {
+			if (y == 3 && (x == 3 || x == 4)) // line to core
+				continue;
+			if (horizontal_lines_[n]) {
+				renderer_.Copy(
+						line_horiz_,
+						SDL2pp::Rect(0, 6, col_offsets_[x + 1] - col_offsets_[x] - 32, 6),
+						SDL2pp::Rect(col_offsets_[x] + 32, row_offsets_[y] + 13, col_offsets_[y + 1] - col_offsets_[y] - 32, 6)
+					);
+			}
 		}
 	}
 }

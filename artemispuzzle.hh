@@ -68,10 +68,15 @@ private:
 	SDL2pp::Texture background_;
 	SDL2pp::Texture pieces_inactive_;
 	SDL2pp::Texture pieces_active_;
+	SDL2pp::Texture line_horiz_;
+	SDL2pp::Texture line_vert_;
 
 private:
 	std::array<PieceType, 62> pieces_;
 	std::array<bool, 62> active_;
+
+	std::array<bool, 8 * 7> horizontal_lines_;
+	std::array<bool, 9 * 6> vertical_lines_;
 
 	int activated_systems_;
 
