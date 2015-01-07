@@ -25,6 +25,7 @@
 #include "artemispuzzle.hh"
 
 #include "datamanager.hh"
+#include "logger.hh"
 
 const std::array<ArtemisPuzzle::PieceType, ArtemisPuzzle::NUM_PIECES> ArtemisPuzzle::initial_pieces_ = { {
 	DR, UL, DR, VE, UL, DR, UL, HO, UL,
@@ -212,8 +213,17 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 	  main2_(renderer, datamanager.GetPath("images/party/main2.rle")),
 	  main3_(renderer, datamanager.GetPath("images/party/main3.rle")),
 	  main4_(renderer, datamanager.GetPath("images/party/main4.rle")),
+	  greyblit_(renderer, datamanager.GetPath("images/party/greyblit.bmp")),
 	  pieces_(initial_pieces_) {
 	RecalculateActivePieces();
+
+	last_frame_time_ = SDL_GetTicks();
+	time_left_[0] = TIME_LIMIT_TICKS;
+	time_left_[1] = TIME_LIMIT_TICKS;
+	time_left_[2] = TIME_LIMIT_TICKS;
+	time_left_[3] = TIME_LIMIT_TICKS;
+
+	Log("puzzle") << "starting artemis puzzle";
 }
 
 ArtemisPuzzle::~ArtemisPuzzle() {
@@ -250,10 +260,35 @@ bool ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 		RecalculateActivePieces();
 	}
 
-	return activated_systems_ != ALL_SYSTEMS;
+	if (activated_systems_ == ALL_SYSTEMS) {
+		Log("puzzle") << "  all systems connected, congratulations!";
+		return false;
+	}
+
+	return true;
 }
 
 bool ArtemisPuzzle::Update(unsigned int) {
+	unsigned int ticks = SDL_GetTicks();
+	unsigned int delta = ticks - last_frame_time_;
+	last_frame_time_ = ticks;
+
+	if (!(activated_systems_ & AUX_BIO_SYSTEMS))
+		time_left_[3] -= delta;
+	if (!(activated_systems_ & AUX_POWER_GRID))
+		time_left_[2] -= delta;
+	if (!(activated_systems_ & AUX_CONTROL_SYSTEM))
+		time_left_[1] -= delta;
+	if (!(activated_systems_ & AUX_AIR_REFILTRATION))
+		time_left_[0] -= delta;
+
+	for (int i = 0; i < 4; i++) {
+		if (time_left_[i] <= 0) {
+			Log("puzzle") << "  your time is out, you're dead";
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -354,5 +389,12 @@ void ArtemisPuzzle::Render() {
 		case 2: renderer_.Copy(main2_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12)); break;
 		case 3: renderer_.Copy(main3_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12)); break;
 		}
+	}
+
+	// time indication
+	for (int sys = 0; sys < 4; sys++) {
+		int numfills = std::min(34, 35 * (TIME_LIMIT_TICKS - time_left_[sys]) / TIME_LIMIT_TICKS);
+		for (int fill = 0; fill < numfills; fill++)
+			renderer_.Copy(greyblit_, SDL2pp::NullOpt, SDL2pp::Rect(7 + sys * 5, 11 + fill * 6, 5, 5));
 	}
 }

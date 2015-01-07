@@ -68,6 +68,8 @@ private:
 
 		CENTRAL_COLUMN = NUM_COLUMNS / 2,
 		CENTRAL_ROW = NUM_ROWS / 2,
+
+		TIME_LIMIT_TICKS = 280 * 1000,
 	};
 
 private:
@@ -95,6 +97,7 @@ private:
 	SDL2pp::Texture main2_;
 	SDL2pp::Texture main3_;
 	SDL2pp::Texture main4_;
+	SDL2pp::Texture greyblit_;
 
 private:
 	std::array<PieceType, NUM_PIECES> pieces_;
@@ -104,6 +107,8 @@ private:
 	std::array<bool, NUM_VERTICAL_LINES> vertical_lines_;
 
 	int activated_systems_;
+	int time_left_[4];
+	unsigned int last_frame_time_;
 
 private:
 	PieceType RotatePiece(PieceType type, bool clockwise = true);
