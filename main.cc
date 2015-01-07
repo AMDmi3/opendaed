@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Marakasov
+ * Copyright (C) 2014-2015 Dmitry Marakasov
  *
  * This file is part of opendaed.
  *
@@ -34,6 +34,7 @@
 #include "gameinterface.hh"
 #include "interpreter.hh"
 #include "movplayer.hh"
+#include "screen.hh"
 
 void usage(const char* progname) {
 	std::cerr << "Usage: " << progname << " [ -n <start nodfile> ] [ -e <start nodfile entry> ] -d <path to data directory>" << std::endl;
@@ -88,6 +89,9 @@ int realmain(int argc, char** argv) {
 	// Script interpreter
 	Interpreter script(data_manager, interface, player, startnod, startentry);
 
+	// Screens that replace interface such as puzzles
+	std::unique_ptr<Screen> screen;
+
 	while (1) {
 		unsigned int frame_ticks = SDL_GetTicks();
 
@@ -103,19 +107,29 @@ int realmain(int argc, char** argv) {
 				}
 			}
 
-			interface.ProcessEvent(event);
+			if (screen)
+				screen->ProcessEvent(event);
+			else
+				interface.ProcessEvent(event);
 		}
 
 		// Update logic
-		interface.Update(frame_ticks);
-		script.Update();
-		player.UpdateFrame(renderer);
+		if (screen) {
+			screen->Update(frame_ticks);
+		} else {
+			interface.Update(frame_ticks);
+			script.Update();
+			player.UpdateFrame(renderer);
+		}
 
 		// Render
 		renderer.SetDrawColor(0, 0, 0);
 		renderer.Clear();
 
-		interface.Render(player.GetTexture());
+		if (screen)
+			screen->Render();
+		else
+			interface.Render(player.GetTexture());
 
 		renderer.Present();
 
