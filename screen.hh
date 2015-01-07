@@ -27,7 +27,7 @@ public:
 	virtual ~Screen();
 
 	virtual bool ProcessEvent(const SDL_Event& event);
-	virtual bool Update(unsigned int ticks);
+	virtual bool Update();
 	virtual void Render();
 };
 

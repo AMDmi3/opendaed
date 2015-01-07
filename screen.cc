@@ -22,11 +22,11 @@
 Screen::~Screen() {
 }
 
-bool Screen::ProcessEvent(const SDL_Event& event) {
+bool Screen::ProcessEvent(const SDL_Event&) {
 	return true;
 }
 
-bool Screen::Update(unsigned int ticks) {
+bool Screen::Update() {
 	return true;
 }
 

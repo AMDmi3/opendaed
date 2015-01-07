@@ -268,7 +268,7 @@ bool ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 	return true;
 }
 
-bool ArtemisPuzzle::Update(unsigned int) {
+bool ArtemisPuzzle::Update() {
 	unsigned int ticks = SDL_GetTicks();
 	unsigned int delta = ticks - last_frame_time_;
 	last_frame_time_ = ticks;

@@ -128,7 +128,7 @@ int realmain(int argc, char** argv) {
 
 		// Update logic
 		if (screen) {
-			if (!screen->Update(frame_ticks))
+			if (!screen->Update())
 				return 0;
 		} else {
 			interface.Update(frame_ticks);

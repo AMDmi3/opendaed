@@ -120,7 +120,7 @@ public:
 	virtual ~ArtemisPuzzle();
 
 	bool ProcessEvent(const SDL_Event& event) override;
-	bool Update(unsigned int ticks) override;
+	bool Update() override;
 	void Render() override;
 };
 
