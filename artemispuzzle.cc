@@ -23,11 +23,11 @@
 
 #include "datamanager.hh"
 
-const std::array<ArtemisPuzzle::PieceType, 62> ArtemisPuzzle::initial_pieces_ = { {
+const std::array<ArtemisPuzzle::PieceType, ArtemisPuzzle::NUM_PIECES> ArtemisPuzzle::initial_pieces_ = { {
 	DR, UL, DR, VE, UL, DR, UL, HO, UL,
 	DR, DL, DR, UR, VE, HO, DR, DR, UL,
 	UL, DR, VE, DR, UR, DR, UL, VE, HO,
-	DR, HO, DR, UL,     UR, HO, HO, DL,
+	DR, HO, DR, UL, DR, UR, HO, HO, DL, // central piece is not used
 	UR, VE, UL, UR, DR, UL, VE, UR, DL,
 	DR, UL, HO, UL, VE, DR, DR, DR, VE,
 	DR, HO, DR, UR, UL, UL, HO, DR, UR,
@@ -35,7 +35,7 @@ const std::array<ArtemisPuzzle::PieceType, 62> ArtemisPuzzle::initial_pieces_ = 
 
 // this is bug2bug compatibility, but actually alignment may be
 // improved; look at connection lines between pieces
-const std::array<int, 9> ArtemisPuzzle::col_offsets_ = { {
+const std::array<int, ArtemisPuzzle::NUM_COLUMNS> ArtemisPuzzle::col_offsets_ = { {
 	44 + 64 * 0,
 	44 + 64 * 1,
 	44 + 64 * 2,
@@ -47,7 +47,7 @@ const std::array<int, 9> ArtemisPuzzle::col_offsets_ = { {
 	44 + 64 * 8,
 } };
 
-const std::array<int, 7> ArtemisPuzzle::row_offsets_ = { {
+const std::array<int, ArtemisPuzzle::NUM_ROWS> ArtemisPuzzle::row_offsets_ = { {
 	36 + 61 * 0,
 	36 + 61 * 1,
 	36 + 61 * 2 + 1,
@@ -74,10 +74,10 @@ void ArtemisPuzzle::RecalculateActivePieces() {
 	std::fill(vertical_lines_.begin(), vertical_lines_.end(), false);
 	activated_systems_ = 0;
 
-	PropagateActivity(4, 3, LEFT);
-	PropagateActivity(4, 3, RIGHT);
-	PropagateActivity(4, 3, UP);
-	PropagateActivity(4, 3, DOWN);
+	PropagateActivity(CENTRAL_COLUMN, CENTRAL_ROW, LEFT);
+	PropagateActivity(CENTRAL_COLUMN, CENTRAL_ROW, RIGHT);
+	PropagateActivity(CENTRAL_COLUMN, CENTRAL_ROW, UP);
+	PropagateActivity(CENTRAL_COLUMN, CENTRAL_ROW, DOWN);
 }
 
 void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
@@ -89,21 +89,21 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 		case DOWN:  y++; break;
 		}
 
-		if (x == -1 && y == 3)
+		if (x == -1 && y == CENTRAL_ROW)
 			activated_systems_ |= AUX_BIO_SYSTEMS;
-		if (x == 9 && y == 3)
+		if (x == NUM_COLUMNS && y == CENTRAL_ROW)
 			activated_systems_ |= AUX_CONTROL_SYSTEM;
-		if (x == 4 && y == -1)
+		if (x == CENTRAL_COLUMN && y == -1)
 			activated_systems_ |= AUX_AIR_REFILTRATION;
-		if (x == 4 && y == 7)
+		if (x == CENTRAL_COLUMN && y == NUM_ROWS)
 			activated_systems_ |= AUX_POWER_GRID;
 
-		if (x < 0 || y < 0 || x > 8 || y > 6)
+		if (x < 0 || y < 0 || x >= NUM_COLUMNS || y >= NUM_ROWS)
 			return; // out of bounds
 		if (x == 4 && y == 3)
 			return; // back into center
 
-		PieceType type = pieces_[PieceNum(x, y)];
+		PieceType type = pieces_[y * NUM_COLUMNS + x];
 
 		Direction prev_dir = dir;
 
@@ -147,31 +147,16 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 		}
 
 		// activate piece
-		active_[PieceNum(x, y)] = true;
+		active_[y * NUM_COLUMNS + x] = true;
 
 		// activate line from prev piece
 		switch (prev_dir) {
-		case LEFT:  horizontal_lines_[y * 8 + x] = true; break;
-		case RIGHT: horizontal_lines_[y * 8 + x - 1] = true; break;
-		case UP:    vertical_lines_[y * 9 + x] = true; break;
-		case DOWN:  vertical_lines_[(y - 1) * 9 + x] = true; break;
+		case LEFT:  horizontal_lines_[y * (NUM_COLUMNS - 1) + x] = true; break;
+		case RIGHT: horizontal_lines_[y * (NUM_COLUMNS - 1) + x - 1] = true; break;
+		case UP:    vertical_lines_[y * NUM_COLUMNS + x] = true; break;
+		case DOWN:  vertical_lines_[(y - 1) * NUM_COLUMNS + x] = true; break;
 		}
 	}
-}
-
-int ArtemisPuzzle::PieceNum(int x, int y) {
-	int npiece = x + y * 9;
-
-	// ignore central piece
-	if (npiece == 31)
-		return -1;
-
-	if (npiece > 31)
-		npiece--;
-
-	assert(npiece >= 0 && npiece < 62);
-
-	return npiece;
 }
 
 ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager)
@@ -201,9 +186,11 @@ bool ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 			return true;
 
 		// calculate piece number
-		int npiece = PieceNum(col_offset - col_offsets_.begin(), row_offset - row_offsets_.begin());
-		if (npiece == -1)
+		int column = col_offset - col_offsets_.begin();
+		int row = row_offset - row_offsets_.begin();
+		if (column >= NUM_COLUMNS || row >= NUM_ROWS)
 			return true;
+		int npiece = row * NUM_COLUMNS + column;
 
 		// rotate piece
 		if (event.button.button == SDL_BUTTON_LEFT)
@@ -227,9 +214,9 @@ void ArtemisPuzzle::Render() {
 
 	// Pieces
 	int n = 0;
-	for (int y = 0; y < 7; y++) {
-		for (int x = 0; x < 9; x++) {
-			if (x == 4 && y == 3) // skip central piece
+	for (int y = 0; y < NUM_ROWS; y++) {
+		for (int x = 0; x < NUM_COLUMNS; x++, n++) {
+			if (n == CENTRAL_PIECE_NUMBER)
 				continue;
 
 			// this is also bug2bug compatible; the thing is that ctrr.bmp
@@ -239,16 +226,14 @@ void ArtemisPuzzle::Render() {
 					SDL2pp::Rect(32 * (int)pieces_[n], 0, 32, 32),
 					SDL2pp::Rect(col_offsets_[x], row_offsets_[y], 32, 32)
 				);
-
-			n++;
 		}
 	}
 
 	// Vertical lines
 	n = 0;
-	for (int y = 0; y < 6; y++) {
-		for (int x = 0; x < 9; x++, n++) {
-			if (x == 4 && (y == 2 || y == 3)) // line to core
+	for (int y = 0; y < NUM_ROWS - 1; y++) {
+		for (int x = 0; x < NUM_COLUMNS; x++, n++) {
+			if (n == NUM_VERTICAL_LINES / 2 || n == NUM_VERTICAL_LINES / 2 - 1) // central lines
 				continue;
 			if (vertical_lines_[n]) {
 				renderer_.Copy(
@@ -262,9 +247,9 @@ void ArtemisPuzzle::Render() {
 
 	// Horizontal lines
 	n = 0;
-	for (int y = 0; y < 7; y++) {
-		for (int x = 0; x < 8; x++, n++) {
-			if (y == 3 && (x == 3 || x == 4)) // line to core
+	for (int y = 0; y < NUM_ROWS; y++) {
+		for (int x = 0; x < NUM_COLUMNS - 1; x++, n++) {
+			if (n == NUM_HORIZONTAL_LINES / 2 || n == NUM_HORIZONTAL_LINES / 2 - 1) // central lines
 				continue;
 			if (horizontal_lines_[n]) {
 				renderer_.Copy(

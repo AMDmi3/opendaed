@@ -56,10 +56,24 @@ private:
 		ALL_SYSTEMS = AUX_BIO_SYSTEMS | AUX_CONTROL_SYSTEM | AUX_AIR_REFILTRATION | AUX_POWER_GRID,
 	};
 
+	enum Constants {
+		NUM_COLUMNS = 9,
+		NUM_ROWS = 7,
+
+		NUM_PIECES = NUM_COLUMNS * NUM_ROWS,
+		CENTRAL_PIECE_NUMBER = NUM_PIECES / 2,
+
+		NUM_HORIZONTAL_LINES = (NUM_COLUMNS - 1) * NUM_ROWS,
+		NUM_VERTICAL_LINES = NUM_COLUMNS * (NUM_ROWS - 1),
+
+		CENTRAL_COLUMN = NUM_COLUMNS / 2,
+		CENTRAL_ROW = NUM_ROWS / 2,
+	};
+
 private:
-	static const std::array<PieceType, 62> initial_pieces_;
-	static const std::array<int, 9> col_offsets_;
-	static const std::array<int, 7> row_offsets_;
+	static const std::array<PieceType, NUM_PIECES> initial_pieces_;
+	static const std::array<int, NUM_COLUMNS> col_offsets_;
+	static const std::array<int, NUM_ROWS> row_offsets_;
 
 private:
 	SDL2pp::Renderer& renderer_;
@@ -72,11 +86,11 @@ private:
 	SDL2pp::Texture line_vert_;
 
 private:
-	std::array<PieceType, 62> pieces_;
-	std::array<bool, 62> active_;
+	std::array<PieceType, NUM_PIECES> pieces_;
+	std::array<bool, NUM_PIECES> active_;
 
-	std::array<bool, 8 * 7> horizontal_lines_;
-	std::array<bool, 9 * 6> vertical_lines_;
+	std::array<bool, NUM_HORIZONTAL_LINES> horizontal_lines_;
+	std::array<bool, NUM_VERTICAL_LINES> vertical_lines_;
 
 	int activated_systems_;
 
@@ -84,8 +98,6 @@ private:
 	PieceType RotatePiece(PieceType type, bool clockwise = true);
 	void RecalculateActivePieces();
 	void PropagateActivity(int x, int y, Direction dir);
-
-	int PieceNum(int x, int y);
 
 public:
 	ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager);
