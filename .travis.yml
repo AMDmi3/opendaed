@@ -13,5 +13,5 @@ script:
     # so hack the source to avoid them. Code would be broken obviously, but
     # furtunately all we need is to ensure it compiles
   - sed -i -e 's/return lqt_get_.*_pts_offset.*/return track;/' quicktime.cc
-  - cmake .
+  - cmake -DCMAKE_CXX_FLAGS=-Werror .
   - make
