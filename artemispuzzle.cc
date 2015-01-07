@@ -21,9 +21,21 @@
 
 #include "datamanager.hh"
 
+const std::vector<ArtemisPuzzle::PieceType> ArtemisPuzzle::initial_pieces_ = {
+	DR, UL, DR, VE, UL, DR, UL, HO, UL,
+	DR, DL, DR, UR, VE, HO, DR, DR, UL,
+	UL, DR, VE, DR, UR, DR, UL, VE, HO,
+	DR, HO, DR, UL,     UR, HO, HO, DL,
+	UR, VE, UL, UR, DR, UL, VE, UR, DL,
+	DR, UL, HO, UL, VE, DR, DR, DR, VE,
+	DR, HO, DR, UR, UL, UL, HO, DR, UR,
+};
+
 ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager)
 	: renderer_(renderer),
-	  background_(renderer, datamanager.GetPath("images/party/backgrnd.rle")) {
+	  background_(renderer, datamanager.GetPath("images/party/backgrnd.rle")),
+	  pieces_inactive_(renderer, datamanager.GetPath("images/party/ctrw.rle")),
+	  pieces_(initial_pieces_) {
 }
 
 ArtemisPuzzle::~ArtemisPuzzle() {
@@ -36,5 +48,31 @@ void ArtemisPuzzle::Update(unsigned int ticks) {
 }
 
 void ArtemisPuzzle::Render() {
+	// Background
 	renderer_.Copy(background_, SDL2pp::NullOpt, SDL2pp::Rect(0, 0, 640, 480));
+
+	// Pieces
+	int n = 0;
+	for (int y = 0; y < 7; y++) {
+		// Uneven space between rows; this is actuaaly more correct than
+		// origial game - it contains single pixel errors in piece placements
+		int y_extra_offset = 0;
+		if (y > 1)
+			y_extra_offset++;
+		if (y > 3)
+			y_extra_offset++;
+
+		for (int x = 0; x < 9; x++) {
+			if (x == 4 && y == 3) // central piece
+				continue;
+
+			renderer_.Copy(
+					pieces_inactive_,
+					SDL2pp::Rect(0 + 32 * (int)pieces_[n], 0, 32, 32),
+					SDL2pp::Rect(45 + x * 64, 36 + y_extra_offset + y * 61, 32, 32)
+				);
+
+			n++;
+		}
+	}
 }

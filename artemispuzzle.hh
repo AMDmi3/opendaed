@@ -20,6 +20,8 @@
 #ifndef ARTEMISPUZZLE_HH
 #define ARTEMISPUZZLE_HH
 
+#include <vector>
+
 #include <SDL2pp/Texture.hh>
 #include <SDL2pp/Renderer.hh>
 
@@ -29,10 +31,27 @@ class DataManager;
 
 class ArtemisPuzzle : public Screen {
 private:
+	enum PieceType {
+		DR = 0,
+		DL = 1,
+		UL = 2,
+		UR = 3,
+		HO = 4,
+		VE = 5,
+	};
+
+private:
+	static const std::vector<PieceType> initial_pieces_;
+
+private:
 	SDL2pp::Renderer& renderer_;
 
 	// Textures
 	SDL2pp::Texture background_;
+	SDL2pp::Texture pieces_inactive_;
+
+private:
+	std::vector<PieceType> pieces_;
 
 public:
 	ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager);
