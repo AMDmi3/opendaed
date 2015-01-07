@@ -74,6 +74,7 @@ private:
 	static const std::array<PieceType, NUM_PIECES> initial_pieces_;
 	static const std::array<int, NUM_COLUMNS> col_offsets_;
 	static const std::array<int, NUM_ROWS> row_offsets_;
+	static const std::array<SDL2pp::Point, 13> light_locations_;
 
 private:
 	SDL2pp::Renderer& renderer_;
@@ -84,6 +85,8 @@ private:
 	SDL2pp::Texture pieces_active_;
 	SDL2pp::Texture line_horiz_;
 	SDL2pp::Texture line_vert_;
+	SDL2pp::Texture core_;
+	SDL2pp::Texture lights_;
 
 private:
 	std::array<PieceType, NUM_PIECES> pieces_;

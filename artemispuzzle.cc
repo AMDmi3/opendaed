@@ -18,6 +18,9 @@
  */
 
 #include <algorithm>
+#include <random>
+
+#include <SDL2/SDL_timer.h>
 
 #include "artemispuzzle.hh"
 
@@ -55,6 +58,39 @@ const std::array<int, ArtemisPuzzle::NUM_ROWS> ArtemisPuzzle::row_offsets_ = { {
 	36 + 61 * 4 + 1,
 	36 + 61 * 5 + 1,
 	36 + 61 * 6 + 2,
+} };
+
+const std::array<SDL2pp::Point, 13> ArtemisPuzzle::light_locations_ = { {
+#ifdef BUG2BUG
+	// original lights are a bit displaced
+	{ 10, 264 },
+	{ 83, 195 },
+	{ 84, 318 },
+	{ 148, 257 },
+	{ 212, 73 },
+	{ 276, 379 },
+	{ 339, 73 },
+	{ 339, 135 },
+	{ 404, 377 },
+	{ 468, 195 },
+	{ 519, 6 },
+	{ 532, 134 },
+	{ 531, 256 },
+#else
+	{ 11, 265 },
+	{ 84, 196 },
+	{ 84, 318 },
+	{ 148, 257 },
+	{ 212, 73 },
+	{ 275, 379 },
+	{ 339, 73 },
+	{ 339, 135 },
+	{ 403, 379 },
+	{ 468, 195 },
+	{ 519, 6 },
+	{ 531, 135 },
+	{ 531, 257 },
+#endif
 } };
 
 ArtemisPuzzle::PieceType ArtemisPuzzle::RotatePiece(PieceType type, bool clockwise) {
@@ -100,7 +136,7 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 
 		if (x < 0 || y < 0 || x >= NUM_COLUMNS || y >= NUM_ROWS)
 			return; // out of bounds
-		if (x == 4 && y == 3)
+		if (x == CENTRAL_COLUMN && y == CENTRAL_ROW)
 			return; // back into center
 
 		PieceType type = pieces_[y * NUM_COLUMNS + x];
@@ -166,6 +202,8 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 	  pieces_active_(renderer, datamanager.GetPath("images/party/ctrr.rle")),
 	  line_horiz_(renderer, datamanager.GetPath("images/party/horz.rle")),
 	  line_vert_(renderer, datamanager.GetPath("images/party/vert.bmp")),
+	  core_(renderer, datamanager.GetPath("images/party/p1circ.bmp")),
+	  lights_(renderer, datamanager.GetPath("images/party/lights.bmp")),
 	  pieces_(initial_pieces_) {
 	RecalculateActivePieces();
 }
@@ -259,5 +297,29 @@ void ArtemisPuzzle::Render() {
 					);
 			}
 		}
+	}
+
+	// animated stuff: core
+	int seconds = SDL_GetTicks() / 1000;
+
+	int corephase = seconds % 15;
+	renderer_.Copy(
+			core_,
+			SDL2pp::Rect(96 * (corephase % 5), 92 * (corephase / 5), 96, 92),
+			SDL2pp::Rect(270, 191, 96, 92)
+		);
+
+	// animated stuff: blinking lighs
+	// fun fact: if you use minstd_rand0 or minstd_rand PRNG here
+	// you'll notice some lights not changing their color (or changing
+	// with long period), likely because of poor quality of PRNG
+	std::mt19937 rnd;
+	rnd.seed(seconds);
+	for (auto& coords : light_locations_) {
+		renderer_.Copy(
+				lights_,
+				SDL2pp::Rect(18 * (rnd() % 3), 0, 18, 18),
+				SDL2pp::Rect(coords.x, coords.y, 18, 18)
+			);
 	}
 }
