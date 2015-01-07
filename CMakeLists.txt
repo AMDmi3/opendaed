@@ -26,6 +26,7 @@ SET(OPENDAED_SOURCES
 	interpreter.cc
 	quicktime.cc
 	movplayer.cc
+	screen.cc
 )
 
 # binary
