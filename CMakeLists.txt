@@ -27,6 +27,7 @@ SET(OPENDAED_SOURCES
 	quicktime.cc
 	movplayer.cc
 	screen.cc
+	artemispuzzle.cc
 )
 
 # binary
