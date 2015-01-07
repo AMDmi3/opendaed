@@ -1,5 +1,7 @@
 # OpenDaed
 
+[![Build Status](https://travis-ci.org/AMDmi3/opendaed.svg?branch=master)](https://travis-ci.org/AMDmi3/opendaed)
+
 F/OSS reimplementation of Mechadeus 1995 "The Daedalus
 Encounter" interactive movie puzzle adventure game.
 
