@@ -66,11 +66,95 @@ ArtemisPuzzle::PieceType ArtemisPuzzle::RotatePiece(PieceType type, bool clockwi
 	}
 }
 
+void ArtemisPuzzle::RecalculateActivePieces() {
+	std::fill(active_.begin(), active_.end(), false);
+	PropagateActivity(4, 3, LEFT);
+	PropagateActivity(4, 3, RIGHT);
+	PropagateActivity(4, 3, UP);
+	PropagateActivity(4, 3, DOWN);
+}
+
+void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
+	while (1) {
+		switch (dir) {
+		case LEFT:  x--; break;
+		case RIGHT: x++; break;
+		case UP:    y--; break;
+		case DOWN:  y++; break;
+		}
+
+		if (x < 0 || y < 0 || x > 8 || y > 6)
+			return; // out of bounds
+		if (x == 4 && y == 3)
+			return; // back into center
+
+		PieceType type = pieces_[PieceNum(x, y)];
+
+		switch (dir) {
+		case LEFT:
+			switch (type) {
+			case DR: dir = DOWN; break;
+			case UR: dir = UP;   break;
+			case HO:             break;
+			default:
+				return;
+			}
+			break;
+		case RIGHT:
+			switch (type) {
+			case DL: dir = DOWN; break;
+			case UL: dir = UP;   break;
+			case HO:             break;
+			default:
+				return;
+			}
+			break;
+		case UP:
+			switch (type) {
+			case DR: dir = RIGHT; break;
+			case DL: dir = LEFT;  break;
+			case VE:              break;
+			default:
+				return;
+			}
+			break;
+		case DOWN:
+			switch (type) {
+			case UL: dir = LEFT;  break;
+			case UR: dir = RIGHT; break;
+			case VE:              break;
+			default:
+				return;
+			}
+			break;
+		}
+
+		active_[PieceNum(x, y)] = true;
+	}
+}
+
+int ArtemisPuzzle::PieceNum(int x, int y) {
+	int npiece = x + y * 9;
+
+	// ignore central piece
+	if (npiece == 31)
+		return -1;
+
+	if (npiece > 31)
+		npiece--;
+
+	assert(npiece >= 0 && npiece < 62);
+
+	return npiece;
+}
+
 ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager)
 	: renderer_(renderer),
 	  background_(renderer, datamanager.GetPath("images/party/backgrnd.rle")),
 	  pieces_inactive_(renderer, datamanager.GetPath("images/party/ctrw.rle")),
+	  pieces_active_(renderer, datamanager.GetPath("images/party/ctrr.rle")),
 	  pieces_(initial_pieces_) {
+	RecalculateActivePieces();
 }
 
 ArtemisPuzzle::~ArtemisPuzzle() {
@@ -89,19 +173,17 @@ void ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 			return;
 
 		// calculate piece number
-		int npiece = (col_offset - col_offsets_.begin()) + (row_offset - row_offsets_.begin()) * 9;
-		if (npiece == 31) // ignore central piece
+		int npiece = PieceNum(col_offset - col_offsets_.begin(), row_offset - row_offsets_.begin());
+		if (npiece == -1)
 			return;
-		else if (npiece > 31)
-			npiece--;
-
-		assert(npiece >= 0 && npiece < 62);
 
 		// rotate piece
 		if (event.button.button == SDL_BUTTON_LEFT)
 			pieces_[npiece] = RotatePiece(pieces_[npiece], true);
 		if (event.button.button == SDL_BUTTON_RIGHT)
 			pieces_[npiece] = RotatePiece(pieces_[npiece], false);
+
+		RecalculateActivePieces();
 	}
 }
 
@@ -120,7 +202,7 @@ void ArtemisPuzzle::Render() {
 				continue;
 
 			renderer_.Copy(
-					pieces_inactive_,
+					active_[n] ? pieces_active_ : pieces_inactive_,
 					SDL2pp::Rect(0 + 32 * (int)pieces_[n], 0, 32, 32),
 					SDL2pp::Rect(col_offsets_[x], row_offsets_[y], 32, 32)
 				);

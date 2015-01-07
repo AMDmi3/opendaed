@@ -40,6 +40,13 @@ private:
 		VE = 5,
 	};
 
+	enum Direction {
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN,
+	};
+
 private:
 	static const std::array<PieceType, 62> initial_pieces_;
 	static const std::array<int, 9> col_offsets_;
@@ -51,12 +58,18 @@ private:
 	// Textures
 	SDL2pp::Texture background_;
 	SDL2pp::Texture pieces_inactive_;
+	SDL2pp::Texture pieces_active_;
 
 private:
 	std::array<PieceType, 62> pieces_;
+	std::array<bool, 62> active_;
 
 private:
 	PieceType RotatePiece(PieceType type, bool clockwise = true);
+	void RecalculateActivePieces();
+	void PropagateActivity(int x, int y, Direction dir);
+
+	int PieceNum(int x, int y);
 
 public:
 	ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager);
