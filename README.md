@@ -53,15 +53,15 @@ opendaed -d <datadir> -n encountr.nod -e 2
 ```
 is the start of the game story.
 
-You may also play puzzles which are already implemented directly.
-For that, run
+You may also directly play puzzles which are already implemented.
+For that, run:
 ```
 opendaed -d <datadir> -p <puzzle name>
 ```
 
 Currently implemented puzzles are:
 
-* ```artemis``` - artemis aux power puzzle
+* ```artemis``` - netwalk-style power connection puzzle
 
 ## Author
 
