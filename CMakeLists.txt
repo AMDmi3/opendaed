@@ -3,7 +3,7 @@ PROJECT(OpenDaed)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # common depends and definitions
-ADD_DEFINITIONS("-std=c++11 -Wall -Wextra -pedantic")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic")
 
 # depends
 IF(NOT EXISTS ${PROJECT_SOURCE_DIR}/extlibs/SDL2pp/CMakeLists.txt)
