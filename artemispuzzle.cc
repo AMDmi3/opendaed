@@ -23,7 +23,7 @@
 
 #include "datamanager.hh"
 
-const std::vector<ArtemisPuzzle::PieceType> ArtemisPuzzle::initial_pieces_ = {
+const std::array<ArtemisPuzzle::PieceType, 62> ArtemisPuzzle::initial_pieces_ = { {
 	DR, UL, DR, VE, UL, DR, UL, HO, UL,
 	DR, DL, DR, UR, VE, HO, DR, DR, UL,
 	UL, DR, VE, DR, UR, DR, UL, VE, HO,
@@ -31,7 +31,7 @@ const std::vector<ArtemisPuzzle::PieceType> ArtemisPuzzle::initial_pieces_ = {
 	UR, VE, UL, UR, DR, UL, VE, UR, DL,
 	DR, UL, HO, UL, VE, DR, DR, DR, VE,
 	DR, HO, DR, UR, UL, UL, HO, DR, UR,
-};
+} };
 
 const std::array<int, 9> ArtemisPuzzle::col_offsets_ = { {
 	45 + 64 * 0,

@@ -20,7 +20,6 @@
 #ifndef ARTEMISPUZZLE_HH
 #define ARTEMISPUZZLE_HH
 
-#include <vector>
 #include <array>
 
 #include <SDL2pp/Texture.hh>
@@ -42,7 +41,7 @@ private:
 	};
 
 private:
-	static const std::vector<PieceType> initial_pieces_;
+	static const std::array<PieceType, 62> initial_pieces_;
 	static const std::array<int, 9> col_offsets_;
 	static const std::array<int, 7> row_offsets_;
 
@@ -54,7 +53,7 @@ private:
 	SDL2pp::Texture pieces_inactive_;
 
 private:
-	std::vector<PieceType> pieces_;
+	std::array<PieceType, 62> pieces_;
 
 private:
 	PieceType RotatePiece(PieceType type, bool clockwise = true);
