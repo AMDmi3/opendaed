@@ -204,6 +204,10 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 	  line_vert_(renderer, datamanager.GetPath("images/party/vert.bmp")),
 	  core_(renderer, datamanager.GetPath("images/party/p1circ.bmp")),
 	  lights_(renderer, datamanager.GetPath("images/party/lights.bmp")),
+	  aux1_(renderer, datamanager.GetPath("images/party/aux1.rle")),
+	  aux2_(renderer, datamanager.GetPath("images/party/aux2.rle")),
+	  aux3_(renderer, datamanager.GetPath("images/party/aux3.rle")),
+	  aux4_(renderer, datamanager.GetPath("images/party/aux4.rle")),
 	  pieces_(initial_pieces_) {
 	RecalculateActivePieces();
 }
@@ -301,6 +305,16 @@ void ArtemisPuzzle::Render() {
 			}
 		}
 	}
+
+	// connected systems indication
+	if (activated_systems_ & AUX_BIO_SYSTEMS)
+		renderer_.Copy(aux4_, SDL2pp::NullOpt, SDL2pp::Rect(38, 460, 120, 12));
+	if (activated_systems_ & AUX_POWER_GRID)
+		renderer_.Copy(aux3_, SDL2pp::NullOpt, SDL2pp::Rect(177, 460, 120, 12));
+	if (activated_systems_ & AUX_CONTROL_SYSTEM)
+		renderer_.Copy(aux2_, SDL2pp::NullOpt, SDL2pp::Rect(320, 460, 120, 12));
+	if (activated_systems_ & AUX_AIR_REFILTRATION)
+		renderer_.Copy(aux1_, SDL2pp::NullOpt, SDL2pp::Rect(469, 460, 120, 12));
 
 	// animated stuff: core
 	int seconds = SDL_GetTicks() / 1000;

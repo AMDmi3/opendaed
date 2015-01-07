@@ -87,6 +87,10 @@ private:
 	SDL2pp::Texture line_vert_;
 	SDL2pp::Texture core_;
 	SDL2pp::Texture lights_;
+	SDL2pp::Texture aux1_;
+	SDL2pp::Texture aux2_;
+	SDL2pp::Texture aux3_;
+	SDL2pp::Texture aux4_;
 
 private:
 	std::array<PieceType, NUM_PIECES> pieces_;
