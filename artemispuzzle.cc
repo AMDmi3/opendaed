@@ -103,6 +103,7 @@ ArtemisPuzzle::PieceType ArtemisPuzzle::RotatePiece(PieceType type, bool clockwi
 	case HO: return VE;
 	case VE: return HO;
 	}
+	return HO; // silence gcc warning
 }
 
 void ArtemisPuzzle::RecalculateActivePieces() {
