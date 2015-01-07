@@ -22,10 +22,12 @@
 Screen::~Screen() {
 }
 
-void Screen::ProcessEvent(const SDL_Event& event) {
+bool Screen::ProcessEvent(const SDL_Event& event) {
+	return true;
 }
 
-void Screen::Update(unsigned int ticks) {
+bool Screen::Update(unsigned int ticks) {
+	return true;
 }
 
 void Screen::Render() {

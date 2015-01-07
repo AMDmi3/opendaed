@@ -117,15 +117,19 @@ int realmain(int argc, char** argv) {
 				}
 			}
 
-			if (screen)
-				screen->ProcessEvent(event);
-			else
+			if (screen) {
+				if (!screen->ProcessEvent(event))
+					return 0;
+
+			} else {
 				interface.ProcessEvent(event);
+			}
 		}
 
 		// Update logic
 		if (screen) {
-			screen->Update(frame_ticks);
+			if (!screen->Update(frame_ticks))
+				return 0;
 		} else {
 			interface.Update(frame_ticks);
 			script.Update();

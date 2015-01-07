@@ -26,8 +26,8 @@ class Screen {
 public:
 	virtual ~Screen();
 
-	virtual void ProcessEvent(const SDL_Event& event);
-	virtual void Update(unsigned int ticks);
+	virtual bool ProcessEvent(const SDL_Event& event);
+	virtual bool Update(unsigned int ticks);
 	virtual void Render();
 };
 

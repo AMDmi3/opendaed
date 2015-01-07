@@ -68,6 +68,8 @@ ArtemisPuzzle::PieceType ArtemisPuzzle::RotatePiece(PieceType type, bool clockwi
 
 void ArtemisPuzzle::RecalculateActivePieces() {
 	std::fill(active_.begin(), active_.end(), false);
+	activated_systems_ = 0;
+
 	PropagateActivity(4, 3, LEFT);
 	PropagateActivity(4, 3, RIGHT);
 	PropagateActivity(4, 3, UP);
@@ -82,6 +84,15 @@ void ArtemisPuzzle::PropagateActivity(int x, int y, Direction dir) {
 		case UP:    y--; break;
 		case DOWN:  y++; break;
 		}
+
+		if (x == -1 && y == 3)
+			activated_systems_ |= AUX_BIO_SYSTEMS;
+		if (x == 9 && y == 3)
+			activated_systems_ |= AUX_CONTROL_SYSTEM;
+		if (x == 4 && y == -1)
+			activated_systems_ |= AUX_AIR_REFILTRATION;
+		if (x == 4 && y == 7)
+			activated_systems_ |= AUX_POWER_GRID;
 
 		if (x < 0 || y < 0 || x > 8 || y > 6)
 			return; // out of bounds
@@ -160,7 +171,7 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 ArtemisPuzzle::~ArtemisPuzzle() {
 }
 
-void ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
+bool ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN) {
 		// get closest next row/column
 		auto col_offset = std::upper_bound(col_offsets_.begin(), col_offsets_.end(), event.button.x);
@@ -168,14 +179,14 @@ void ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 
 		// fix row/col and check we're in bounds
 		if (col_offset-- == col_offsets_.begin() || event.button.x - *col_offset >= 32)
-			return;
+			return true;
 		if (row_offset-- == row_offsets_.begin() || event.button.y - *row_offset >= 32)
-			return;
+			return true;
 
 		// calculate piece number
 		int npiece = PieceNum(col_offset - col_offsets_.begin(), row_offset - row_offsets_.begin());
 		if (npiece == -1)
-			return;
+			return true;
 
 		// rotate piece
 		if (event.button.button == SDL_BUTTON_LEFT)
@@ -185,9 +196,12 @@ void ArtemisPuzzle::ProcessEvent(const SDL_Event& event) {
 
 		RecalculateActivePieces();
 	}
+
+	return activated_systems_ != ALL_SYSTEMS;
 }
 
-void ArtemisPuzzle::Update(unsigned int ticks) {
+bool ArtemisPuzzle::Update(unsigned int) {
+	return true;
 }
 
 void ArtemisPuzzle::Render() {

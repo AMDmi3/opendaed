@@ -47,6 +47,15 @@ private:
 		DOWN,
 	};
 
+	enum Systems {
+		AUX_BIO_SYSTEMS = 1,
+		AUX_CONTROL_SYSTEM = 2,
+		AUX_AIR_REFILTRATION = 4,
+		AUX_POWER_GRID = 8,
+
+		ALL_SYSTEMS = AUX_BIO_SYSTEMS | AUX_CONTROL_SYSTEM | AUX_AIR_REFILTRATION | AUX_POWER_GRID,
+	};
+
 private:
 	static const std::array<PieceType, 62> initial_pieces_;
 	static const std::array<int, 9> col_offsets_;
@@ -64,6 +73,8 @@ private:
 	std::array<PieceType, 62> pieces_;
 	std::array<bool, 62> active_;
 
+	int activated_systems_;
+
 private:
 	PieceType RotatePiece(PieceType type, bool clockwise = true);
 	void RecalculateActivePieces();
@@ -75,8 +86,8 @@ public:
 	ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager);
 	virtual ~ArtemisPuzzle();
 
-	void ProcessEvent(const SDL_Event& event) override;
-	void Update(unsigned int ticks) override;
+	bool ProcessEvent(const SDL_Event& event) override;
+	bool Update(unsigned int ticks) override;
 	void Render() override;
 };
 
