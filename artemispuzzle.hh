@@ -21,6 +21,7 @@
 #define ARTEMISPUZZLE_HH
 
 #include <vector>
+#include <array>
 
 #include <SDL2pp/Texture.hh>
 #include <SDL2pp/Renderer.hh>
@@ -42,6 +43,8 @@ private:
 
 private:
 	static const std::vector<PieceType> initial_pieces_;
+	static const std::array<int, 9> col_offsets_;
+	static const std::array<int, 7> row_offsets_;
 
 private:
 	SDL2pp::Renderer& renderer_;
@@ -52,6 +55,9 @@ private:
 
 private:
 	std::vector<PieceType> pieces_;
+
+private:
+	PieceType RotatePiece(PieceType type, bool clockwise = true);
 
 public:
 	ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& datamanager);
