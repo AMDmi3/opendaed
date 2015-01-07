@@ -208,6 +208,10 @@ ArtemisPuzzle::ArtemisPuzzle(SDL2pp::Renderer& renderer, const DataManager& data
 	  aux2_(renderer, datamanager.GetPath("images/party/aux2.rle")),
 	  aux3_(renderer, datamanager.GetPath("images/party/aux3.rle")),
 	  aux4_(renderer, datamanager.GetPath("images/party/aux4.rle")),
+	  main1_(renderer, datamanager.GetPath("images/party/main1.rle")),
+	  main2_(renderer, datamanager.GetPath("images/party/main2.rle")),
+	  main3_(renderer, datamanager.GetPath("images/party/main3.rle")),
+	  main4_(renderer, datamanager.GetPath("images/party/main4.rle")),
 	  pieces_(initial_pieces_) {
 	RecalculateActivePieces();
 }
@@ -338,5 +342,17 @@ void ArtemisPuzzle::Render() {
 				SDL2pp::Rect(18 * (rnd() % 3), 0, 18, 18),
 				SDL2pp::Rect(coords.x, coords.y, 18, 18)
 			);
+	}
+
+	// animated stuff: useless messages
+	if (activated_systems_ == ALL_SYSTEMS) {
+		renderer_.Copy(main4_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12));
+	} else {
+		switch (seconds % 4) {
+		case 0: break;
+		case 1: renderer_.Copy(main1_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12)); break;
+		case 2: renderer_.Copy(main2_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12)); break;
+		case 3: renderer_.Copy(main3_, SDL2pp::NullOpt, SDL2pp::Rect(40, 6, 250, 12)); break;
+		}
 	}
 }

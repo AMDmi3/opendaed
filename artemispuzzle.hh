@@ -91,6 +91,10 @@ private:
 	SDL2pp::Texture aux2_;
 	SDL2pp::Texture aux3_;
 	SDL2pp::Texture aux4_;
+	SDL2pp::Texture main1_;
+	SDL2pp::Texture main2_;
+	SDL2pp::Texture main3_;
+	SDL2pp::Texture main4_;
 
 private:
 	std::array<PieceType, NUM_PIECES> pieces_;
