@@ -36,8 +36,10 @@
 #include "movplayer.hh"
 #include "screen.hh"
 
+#include "artemispuzzle.hh"
+
 void usage(const char* progname) {
-	std::cerr << "Usage: " << progname << " [ -n <start nodfile> ] [ -e <start nodfile entry> ] -d <path to data directory>" << std::endl;
+	std::cerr << "Usage: " << progname << " [ -n <start nodfile> ] [ -e <start nodfile entry> ] [ -p <puzzle name> ] -d <path to data directory>" << std::endl;
 }
 
 int realmain(int argc, char** argv) {
@@ -47,8 +49,10 @@ int realmain(int argc, char** argv) {
 	const char* startnod = "encountr.nod";
 	int startentry = 2;
 
+	std::string puzzle;
+
 	int ch;
-	while ((ch = getopt(argc, argv, "d:n:e:h")) != -1) {
+	while ((ch = getopt(argc, argv, "d:n:e:p:h")) != -1) {
 		switch (ch) {
 		case 'd':
 			datapath = optarg;
@@ -59,6 +63,9 @@ int realmain(int argc, char** argv) {
 			break;
 		case 'e':
 			startentry = std::stoi(optarg);
+			break;
+		case 'p':
+			puzzle = optarg;
 			break;
 		case 'h':
 			usage(progname);
@@ -91,6 +98,9 @@ int realmain(int argc, char** argv) {
 
 	// Screens that replace interface such as puzzles
 	std::unique_ptr<Screen> screen;
+
+	if (puzzle == "artemis")
+		screen.reset(new ArtemisPuzzle(renderer, data_manager));
 
 	while (1) {
 		unsigned int frame_ticks = SDL_GetTicks();
