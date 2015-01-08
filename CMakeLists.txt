@@ -23,6 +23,7 @@ SET(OPENDAED_SOURCES
 	artemispuzzle.cc
 	datamanager.cc
 	gameinterface.cc
+	hexagonspuzzle.cc
 	hotfile.cc
 	interpreter.cc
 	main.cc
@@ -37,6 +38,7 @@ SET(OPENDAED_HEADERS
 	datamanager.hh
 	gameeventlistener.hh
 	gameinterface.hh
+	hexagonspuzzle.hh
 	hotfile.hh
 	interpreter.hh
 	logger.hh
