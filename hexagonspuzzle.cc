@@ -220,10 +220,15 @@ void HexagonsPuzzle::Render() {
 		SDL2pp::Point v1 = piece_locations_[6] + vertex_coords_[line.first];
 		SDL2pp::Point v2 = piece_locations_[6] + vertex_coords_[line.second];
 
-		if (last_touched_lines_.find(line) != last_touched_lines_.end())
-			renderer_.SetDrawColor(255, 0, 0);
-		else
-			renderer_.SetDrawColor(0, 255, 0);
+		ThickLine(v1, v2);
+	}
+
+	// last touched piece, should overpaint other lines
+	renderer_.SetDrawColor(255, 0, 0);
+
+	for (auto& line : last_touched_lines_) {
+		SDL2pp::Point v1 = piece_locations_[6] + vertex_coords_[line.first];
+		SDL2pp::Point v2 = piece_locations_[6] + vertex_coords_[line.second];
 
 		ThickLine(v1, v2);
 	}
