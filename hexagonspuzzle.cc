@@ -157,7 +157,7 @@ HexagonsPuzzle::~HexagonsPuzzle() {
 
 bool HexagonsPuzzle::ProcessEvent(const SDL_Event& event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN) {
-		int npiece;
+		int npiece = -1;
 		for (auto pieceloc = piece_locations_.begin(); pieceloc != piece_locations_.end(); pieceloc++) {
 			if (!SDL2pp::Rect(pieceloc->x, pieceloc->y, 80, 80).Contains(SDL2pp::Point(event.button.x, event.button.y)))
 				continue;
@@ -166,7 +166,7 @@ bool HexagonsPuzzle::ProcessEvent(const SDL_Event& event) {
 			break;
 		}
 
-		if (npiece > 5)
+		if (npiece < 0 || npiece > 5)
 			return true;
 
 		for (auto& line : hex_lines_[npiece]) {
