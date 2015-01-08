@@ -20,16 +20,30 @@ FIND_PACKAGE(QuickTime REQUIRED)
 
 # sources
 SET(OPENDAED_SOURCES
-	main.cc
+	artemispuzzle.cc
 	datamanager.cc
 	gameinterface.cc
-	nodfile.cc
 	hotfile.cc
 	interpreter.cc
-	quicktime.cc
+	main.cc
 	movplayer.cc
+	nodfile.cc
+	quicktime.cc
 	screen.cc
-	artemispuzzle.cc
+)
+
+SET(OPENDAED_HEADERS
+	artemispuzzle.hh
+	datamanager.hh
+	gameeventlistener.hh
+	gameinterface.hh
+	hotfile.hh
+	interpreter.hh
+	logger.hh
+	movplayer.hh
+	nodfile.hh
+	quicktime.hh
+	screen.hh
 )
 
 # binary
@@ -38,5 +52,5 @@ IF(BUG2BUG)
 ENDIF(BUG2BUG)
 
 INCLUDE_DIRECTORIES(${SDL2PP_INCLUDE_DIRS} ${QUICKTIME_INCLUDE_DIR})
-ADD_EXECUTABLE(opendaed ${OPENDAED_SOURCES})
+ADD_EXECUTABLE(opendaed ${OPENDAED_SOURCES} ${OPENDAED_HEADERS})
 TARGET_LINK_LIBRARIES(opendaed ${SDL2PP_LIBRARIES} ${QUICKTIME_LIBRARY})
