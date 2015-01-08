@@ -177,6 +177,20 @@ bool HexagonsPuzzle::ProcessEvent(const SDL_Event& event) {
 		last_touched_piece_ = npiece;
 
 		RecalculateSummary();
+
+		if (all_lines_.size() == 15) { // all lines filled in central hexagon
+			// XXX: support difficulty levels here
+			// 'hard' requires all 6 levels
+			// 'medium' requireds only 3 levels
+			// 'easy' not yet known
+			if (level_ == 5) {
+				Log("puzzle") << "  congrats, puzzle is solved";
+				return false;
+			} else {
+				Log("puzzle") << "  congrats, level solved";
+				SetupLevel(level_ + 1);
+			}
+		}
 	}
 
 	return true;
