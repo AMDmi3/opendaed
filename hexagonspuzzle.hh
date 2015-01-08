@@ -36,10 +36,10 @@ private:
 	typedef std::pair<int, int> LineDesc;
 	typedef std::vector<LineDesc> LineSet;
 
-
 private:
 	static const std::array<SDL2pp::Point, 7> piece_locations_;
 	static const std::array<SDL2pp::Point, 6> vertex_coords_;
+	static const std::array<SDL2pp::Point, 6> level_locations_;
 
 	static const std::array<std::array<LineSet, 6>, 6> level_hex_lines_;
 

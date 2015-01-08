@@ -26,6 +26,10 @@
 #include "datamanager.hh"
 #include "logger.hh"
 
+// TODO: spinner lights around level indicators are missing
+// TODO: no solve animation
+// TODO: no sounds
+
 // pieces are numbered clockwise from top right
 const std::array<SDL2pp::Point, 7> HexagonsPuzzle::piece_locations_ = { {
 	{ 328, 111 },
@@ -47,6 +51,15 @@ const std::array<SDL2pp::Point, 6> HexagonsPuzzle::vertex_coords_ = { {
 	{ 39, 75 },
 	{ 7, 57 },
 	{ 7, 20 },
+} };
+
+const std::array<SDL2pp::Point, 6> HexagonsPuzzle::level_locations_ = { {
+	{ 407, 16 },
+	{ 521, 212 },
+	{ 408, 409 },
+	{ 180, 409 },
+	{ 67, 214 },
+	{ 179, 16 },
 } };
 
 // this is level data:
@@ -203,6 +216,15 @@ bool HexagonsPuzzle::Update() {
 void HexagonsPuzzle::Render() {
 	// background
 	renderer_.Copy(background_, SDL2pp::NullOpt, SDL2pp::Rect(0, 0, 640, 480));
+
+	// level indicator
+	for (int i = 0; i < level_; i++) {
+		renderer_.Copy(
+				levels_,
+				SDL2pp::Rect(52 * i, 0, 52, 52),
+				SDL2pp::Rect(level_locations_[i].x, level_locations_[i].y, 52, 52)
+			);
+	}
 
 	// pieces
 	renderer_.SetDrawColor(0, 255, 0);
