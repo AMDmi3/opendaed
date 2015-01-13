@@ -31,6 +31,7 @@ SET(OPENDAED_SOURCES
 	nodfile.cc
 	quicktime.cc
 	screen.cc
+	sunpuzzle.cc
 )
 
 SET(OPENDAED_HEADERS
@@ -46,6 +47,7 @@ SET(OPENDAED_HEADERS
 	nodfile.hh
 	quicktime.hh
 	screen.hh
+	sunpuzzle.hh
 )
 
 # binary

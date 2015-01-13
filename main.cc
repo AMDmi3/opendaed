@@ -38,6 +38,7 @@
 
 #include "artemispuzzle.hh"
 #include "hexagonspuzzle.hh"
+#include "sunpuzzle.hh"
 
 void usage(const char* progname) {
 	std::cerr << "Usage: " << progname << " [ -n <start nodfile> ] [ -e <start nodfile entry> ] [ -p <puzzle name> ] -d <path to data directory>" << std::endl;
@@ -102,8 +103,10 @@ int realmain(int argc, char** argv) {
 
 	if (puzzle == "artemis")
 		screen.reset(new ArtemisPuzzle(renderer, data_manager));
-	if (puzzle == "hexagons")
+	else if (puzzle == "hexagons")
 		screen.reset(new HexagonsPuzzle(renderer, data_manager));
+	else if (puzzle == "sun")
+		screen.reset(new SunPuzzle(renderer, data_manager));
 
 	while (1) {
 		unsigned int frame_ticks = SDL_GetTicks();

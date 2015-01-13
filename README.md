@@ -62,6 +62,8 @@ opendaed -d <datadir> -p <puzzle name>
 Currently implemented puzzles are:
 
 * ```artemis``` - netwalk-style power connection puzzle
+* ```hexagons``` - yellow door puzzle
+* ```sun``` - sundial puzzle in engine room
 
 ## Author
 
