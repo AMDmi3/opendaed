@@ -27,8 +27,9 @@
 #include "logger.hh"
 
 // TODO: spinner lights around level indicators are missing
-// TODO: no solve animation
-// TODO: no sounds
+// TODO: solve animation
+// TODO: sounds
+// TODO: difficilty levels
 
 // pieces are numbered clockwise from top right
 const std::array<SDL2pp::Point, 7> HexagonsPuzzle::piece_locations_ = { {
@@ -193,9 +194,6 @@ bool HexagonsPuzzle::ProcessEvent(const SDL_Event& event) {
 
 		if (all_lines_.size() == 15) { // all lines filled in central hexagon
 			// XXX: support difficulty levels here
-			// 'hard' requires all 6 levels
-			// 'medium' requireds only 3 levels
-			// 'easy' not yet known
 			if (level_ == 5) {
 				Log("puzzle") << "  congrats, puzzle is solved";
 				return false;
