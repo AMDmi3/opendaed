@@ -62,7 +62,7 @@ void DataManager::ScanDir(const std::string& datapath) {
 	// with specific name is only present on a single disk once
 	// and if it's present on different disks, all copies are
 	// identical
-	ScanDir(datapath, [this, &new_files](const std::string& dir, const std::string& file){
+	ScanDir(datapath, [&new_files](const std::string& dir, const std::string& file){
 			std::string fullpath = dir + "/" + file;
 			std::string lcfile = file;
 			std::transform(lcfile.begin(), lcfile.end(), lcfile.begin(), ::tolower);
